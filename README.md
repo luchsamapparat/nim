@@ -1,4 +1,4 @@
-# NIM
+# Nim game library
 
 [![Build Status](https://travis-ci.org/luchsamapparat/nim.svg?branch=master)](https://travis-ci.org/luchsamapparat/nim)
 
