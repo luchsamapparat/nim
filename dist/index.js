@@ -4,3 +4,5 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./src/nim"));
+__export(require("./src/strategy"));
+__export(require("./src/util"));
