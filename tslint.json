@@ -5,8 +5,10 @@
     ],
     "jsRules": {},
     "rules": {
+        "array-type": false,
         "arrow-parens": false,
         "interface-name": false,
+        "max-classes-per-file": false,
         "max-line-length": false,
         "quotemark": [true, "single", "avoid-escape"],
         "trailing-comma": false

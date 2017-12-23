@@ -1,19 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const strategy_1 = require("./strategy");
+const util_1 = require("./util");
 var Player;
 (function (Player) {
     Player["Human"] = "Human";
     Player["Machine"] = "Machine";
 })(Player = exports.Player || (exports.Player = {}));
 class NimGame {
-    constructor(heapSize, startingPlayer) {
+    constructor(heapSize, startingPlayer, strategy = new strategy_1.RandomStrategy()) {
         this.heapSize = heapSize;
         this.startingPlayer = startingPlayer;
+        this.strategy = strategy;
         this.started = false;
         this.winner = null;
-    }
-    getMaxTokensToRemove() {
-        return (this.heapSize) > 3 ? 3 : this.heapSize;
     }
     start() {
         const turns = (this.startingPlayer === Player.Human) ? [] : [this.playMachineTurn()];
@@ -25,7 +25,7 @@ class NimGame {
             throw new Error(`You must start the game first.`);
         }
         if (!this.isValidTurn(tokensToRemove)) {
-            throw new Error(`You may remove between 1 to ${this.getMaxTokensToRemove()} tokens from the heap.`);
+            throw new Error(`You may remove between 1 to ${util_1.getMaxTokensToRemove(this.heapSize)} tokens from the heap.`);
         }
         const turns = [
             ...(this.isFinished ? [] : [this.playHumanTurn(tokensToRemove)]),
@@ -37,7 +37,7 @@ class NimGame {
         return this.playTurn(Player.Human, tokensToRemove);
     }
     playMachineTurn() {
-        return this.playTurn(Player.Machine, this.getRandomTurn());
+        return this.playTurn(Player.Machine, this.strategy.getNextTurn(this.heapSize));
     }
     playTurn(player, tokensToRemove) {
         this.removeTokensFromHeap(tokensToRemove);
@@ -57,7 +57,7 @@ class NimGame {
     }
     isValidTurn(tokensToRemove) {
         return (tokensToRemove > 0 &&
-            tokensToRemove <= this.getMaxTokensToRemove());
+            tokensToRemove <= util_1.getMaxTokensToRemove(this.heapSize));
     }
     toRound(turns) {
         return {
@@ -66,9 +66,6 @@ class NimGame {
             isFinished: this.isFinished,
             winner: this.winner
         };
-    }
-    getRandomTurn() {
-        return Math.floor(Math.random() * this.getMaxTokensToRemove()) + 1;
     }
 }
 exports.NimGame = NimGame;

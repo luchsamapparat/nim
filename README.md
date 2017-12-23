@@ -14,6 +14,8 @@ npm install
 
 ## Use
 
+### Basic Usage
+
 ```ts
 import { NimGame, Player } from '@luchsamapparat/nim';
 
@@ -45,4 +47,19 @@ const lastRound = nimGame.playRound(2);
 const maxTokensToRemove = nimGame.getMaxTokensToRemove();
 
 // maxTokensToRemove = 3;
+```
+
+### Using a Strategy
+
+```ts
+import { NimGame, Player, RandomStrategy, AlwaysOneStrategy } from '@luchsamapparat/nim';
+
+const heapSize = 13;
+const startingPlayer = Player.Human;
+
+// computer removes randomly removes 1 to 3 tokens
+new NimGame(heapSize, startingPlayer, new RandomStrategy();
+
+// computer always removes 1 token
+new NimGame(heapSize, startingPlayer, new AlwaysOneStrategy();
 ```
