@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.3.0"></a>
+# [1.3.0](https://github.com/luchsamapparat/nim/compare/v1.2.3...v1.3.0) (2017-12-23)
+
+
+### Features
+
+* added remainder and mimic-human strategy, use remainder by default, added tests for all strategies ([312245f](https://github.com/luchsamapparat/nim/commit/312245f))
+
+
+
 <a name="1.2.3"></a>
 ## [1.2.3](https://github.com/luchsamapparat/nim/compare/v1.2.2...v1.2.3) (2017-12-23)
 
