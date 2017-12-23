@@ -12,6 +12,7 @@
     "watch": "run-s clean dev",
     "dev": "run-p \"compile -- --watch\" \"test -- --notify --watch\"",
     "test": "jest --verbose",
+    "release": "standard-version",
     "prepublishOnly": "npm run build"
   },
   "repository": {
@@ -36,6 +37,7 @@
     "jest": "^22.0.4",
     "npm-run-all": "^4.1.2",
     "rimraf": "^2.6.2",
+    "standard-version": "^4.2.0",
     "ts-jest": "^22.0.0",
     "tslint": "^5.8.0",
     "typescript": "^2.6.2"
