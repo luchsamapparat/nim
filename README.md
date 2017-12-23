@@ -1,12 +1,16 @@
 # NIM
 
-## Setup
+[![Build Status](https://travis-ci.org/luchsamapparat/nim.svg?branch=master)](https://travis-ci.org/luchsamapparat/nim)
+
+## Install
 
 ```
-npm install
+npm install @luchsamapparat/nim
 ```
 
 ## Develop, build and test
+
+Install dependcies first via `npm install`. Then...
 
 * `npm run build` Clean the `dist` directory, run TSLint and build the library
 * `npm run watch` Clean the `dist` directory, build and test the library in parallel and repeat on file change
