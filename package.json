@@ -11,7 +11,7 @@
     "build": "run-s clean lint compile",
     "watch": "run-s clean dev",
     "dev": "run-p \"compile -- --watch\" \"test -- --notify --watch\"",
-    "test": "jest",
+    "test": "jest --verbose",
     "prepublishOnly": "npm run build"
   },
   "repository": {
