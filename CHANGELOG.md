@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.2"></a>
+## [1.2.2](https://github.com/luchsamapparat/nim/compare/v1.2.1...v1.2.2) (2017-12-23)
+
+
+### Bug Fixes
+
+* prevent additional build on release ([b74b8ee](https://github.com/luchsamapparat/nim/commit/b74b8ee))
+* run git diff to find cause for failing release on travis ([d82f883](https://github.com/luchsamapparat/nim/commit/d82f883))
+
+
+
 <a name="1.2.1"></a>
 ## [1.2.1](https://github.com/luchsamapparat/nim/compare/v1.2.0...v1.2.1) (2017-12-23)
 
