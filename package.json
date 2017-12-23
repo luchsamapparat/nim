@@ -1,0 +1,44 @@
+{
+  "name": "@luchsamapparat/nim",
+  "version": "0.0.1",
+  "description": "Nim game library",
+  "main": "dist/index",
+  "typings": "dist/index",
+  "scripts": {
+    "clean": "rimraf dist",
+    "lint": "tslint --project .",
+    "compile": "tsc --project .",
+    "build": "run-s clean lint compile",
+    "watch": "run-s clean dev",
+    "dev": "run-p \"compile -- --watch\" \"test -- --notify --watch\"",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luchsamapparat/nim.git"
+  },
+  "keywords": [
+    "nim",
+    "game"
+  ],
+  "files": [
+    "dist"
+  ],
+  "author": "Marvin Luchs <marvin@luchs.org>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luchsamapparat/nim/issues"
+  },
+  "homepage": "https://github.com/luchsamapparat/nim#readme",
+  "devDependencies": {
+    "@types/jest": "^21.1.9",
+    "jest": "^22.0.4",
+    "npm-run-all": "^4.1.2",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^22.0.0",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.2"
+  },
+  "dependencies": {}
+}
