@@ -1,15 +1,17 @@
-import { AlwaysOneStrategy, NimGame, Player, RandomStrategy, Round } from '../index';
-import { HEAP_SIZE, MAX_TOKENS_TO_REMOVE, MIN_TOKENS_TO_REMOVE, playGame } from './test-util';
+import { AlwaysOneStrategy, MimicHumanStrategy, NimGame, Player, RandomStrategy, RemainderStrategy, Round, Strategy } from '../index';
+import { getMockStrategy, HEAP_SIZE, MAX_TOKENS_TO_REMOVE, MIN_TOKENS_TO_REMOVE, playGame } from './test-util';
 
 const strategies = [
     RandomStrategy,
-    AlwaysOneStrategy
+    AlwaysOneStrategy,
+    MimicHumanStrategy,
+    RemainderStrategy
 ];
 
-strategies.forEach(Strategy => {
+strategies.forEach(StrategyCls => {
 
-    describe(`NimGame with ${Strategy.name}`, () => {
-        const strategy = new Strategy();
+    describe(`NimGame with ${StrategyCls.name}`, () => {
+        const strategy = new StrategyCls();
 
         test('the initial heap size is configurable', () => {
             const nimGame = new NimGame(HEAP_SIZE, Player.Human, strategy);
@@ -117,4 +119,38 @@ strategies.forEach(Strategy => {
 
     });
 
+});
+
+describe('machine strategy', () => {
+    let mockStrategy: Strategy;
+    let getNextTurn: jest.SpyInstance;
+    let nimGame: NimGame;
+
+    beforeEach(() => {
+        mockStrategy = getMockStrategy();
+        getNextTurn = (<any> mockStrategy.getNextTurn);
+    });
+
+    test('when the machine is the starting player, it receives the current heap size to make its decision', () => {
+        nimGame = new NimGame(HEAP_SIZE, Player.Machine, mockStrategy);
+        nimGame.start();
+
+        expect(getNextTurn).toHaveBeenLastCalledWith(HEAP_SIZE, undefined);
+    });
+
+    test('the machine receives the current heap size to make its decision', () => {
+        nimGame = new NimGame(HEAP_SIZE, Player.Human, mockStrategy);
+        nimGame.start();
+
+        const round = nimGame.playRound(1);
+        const heapSizeAfterHumanTurn = HEAP_SIZE - round.turns[0].tokensRemoved;
+
+        expect(getNextTurn).toHaveBeenLastCalledWith(
+            heapSizeAfterHumanTurn,
+            {
+                player: Player.Human,
+                tokensRemoved: 1
+            }
+        );
+    });
 });

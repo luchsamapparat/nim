@@ -23,7 +23,7 @@ export declare class NimGame {
     start(): Round;
     playRound(tokensToRemove: number): Round;
     private playHumanTurn(tokensToRemove);
-    private playMachineTurn();
+    private playMachineTurn(humanTurn?);
     private playTurn(player, tokensToRemove);
     private removeTokensFromHeap(tokensToRemove);
     private readonly isFinished;

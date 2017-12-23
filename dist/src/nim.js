@@ -8,7 +8,7 @@ var Player;
     Player["Machine"] = "Machine";
 })(Player = exports.Player || (exports.Player = {}));
 class NimGame {
-    constructor(heapSize, startingPlayer, strategy = new strategy_1.RandomStrategy()) {
+    constructor(heapSize, startingPlayer, strategy = new strategy_1.RemainderStrategy()) {
         this.heapSize = heapSize;
         this.startingPlayer = startingPlayer;
         this.strategy = strategy;
@@ -27,17 +27,25 @@ class NimGame {
         if (!this.isValidTurn(tokensToRemove)) {
             throw new Error(`You may remove between 1 to ${util_1.getMaxTokensToRemove(this.heapSize)} tokens from the heap.`);
         }
+        const humanTurn = this.playHumanTurn(tokensToRemove);
+        const machineTurn = this.playMachineTurn(humanTurn);
         const turns = [
-            ...(this.isFinished ? [] : [this.playHumanTurn(tokensToRemove)]),
-            ...(this.isFinished ? [] : [this.playMachineTurn()])
+            ...((humanTurn === null) ? [] : [humanTurn]),
+            ...((machineTurn === null) ? [] : [machineTurn]),
         ];
         return this.toRound(turns);
     }
     playHumanTurn(tokensToRemove) {
+        if (this.isFinished) {
+            return null;
+        }
         return this.playTurn(Player.Human, tokensToRemove);
     }
-    playMachineTurn() {
-        return this.playTurn(Player.Machine, this.strategy.getNextTurn(this.heapSize));
+    playMachineTurn(humanTurn) {
+        if (this.isFinished) {
+            return null;
+        }
+        return this.playTurn(Player.Machine, this.strategy.getNextTurn(this.heapSize, humanTurn));
     }
     playTurn(player, tokensToRemove) {
         this.removeTokensFromHeap(tokensToRemove);
