@@ -1,7 +1,7 @@
 language: node_js
 node_js:
 - node
-before_deploy: "git diff"
+before_deploy: "git checkout ."
 deploy:
   provider: npm
   email: marvin@luchs.org
