@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.1"></a>
+## [1.2.1](https://github.com/luchsamapparat/nim/compare/v1.2.0...v1.2.1) (2017-12-23)
+
+
+### Bug Fixes
+
+* disabled object-literal-sort-keys rule ([5f69293](https://github.com/luchsamapparat/nim/commit/5f69293))
+* removed prepublishonly script to fix publishing via travis ([7498640](https://github.com/luchsamapparat/nim/commit/7498640))
+
+
+
+<a name="1.1.0"></a>
+# [1.1.0](https://github.com/luchsamapparat/nim/compare/v1.0.0...v1.1.0) (2017-12-23)
+
+
+
 <a name="1.2.0"></a>
 # [1.2.0](https://github.com/luchsamapparat/nim/compare/v1.0.0...v1.2.0) (2017-12-23)
 
