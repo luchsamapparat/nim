@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.4.0"></a>
+# [1.4.0](https://github.com/luchsamapparat/nim/compare/v1.3.0...v1.4.0) (2017-12-28)
+
+
+### Features
+
+* configured test debugging in vscode ([f1a745b](https://github.com/luchsamapparat/nim/commit/f1a745b))
+* customize game via config parameters, always return complete game state, implemented strategies as higher-order functions ([640c5b3](https://github.com/luchsamapparat/nim/commit/640c5b3))
+* switch to [@luchsamappat](https://github.com/luchsamappat) tslint-config ([f0d3a6d](https://github.com/luchsamapparat/nim/commit/f0d3a6d))
+
+
+
 <a name="1.3.0"></a>
 # [1.3.0](https://github.com/luchsamapparat/nim/compare/v1.2.3...v1.3.0) (2017-12-23)
 
