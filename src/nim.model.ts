@@ -15,7 +15,6 @@ export interface GameState {
     heapSize: number;
     minTokensAllowedToRemove: number;
     maxTokensAllowedToRemove: number;
-    started: boolean;
     turns: Turn[];
     winner: Player | null;
     config: GameConfig;
