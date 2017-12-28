@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/luchsamapparat/nim/compare/v2.0.0...v3.0.0) (2017-12-28)
+
+
+### Features
+
+* refactored game API to be functional ([edf889b](https://github.com/luchsamapparat/nim/commit/edf889b))
+
+
+### BREAKING CHANGES
+
+* no NimGame needs to be initialized anymore, just call playNim
+
+
+
 <a name="2.0.0"></a>
 # [2.0.0](https://github.com/luchsamapparat/nim/compare/v1.4.0...v2.0.0) (2017-12-28)
 
