@@ -1,53 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const util_1 = require("./util");
+const always_min_1 = require("./strategy/always-min");
+const mimic_human_1 = require("./strategy/mimic-human");
+const random_1 = require("./strategy/random");
+const remainder_1 = require("./strategy/remainder");
 function getStrategies() {
     return [
-        RandomStrategy,
-        AlwaysOneStrategy,
-        MimicHumanStrategy,
-        RemainderStrategy
+        always_min_1.alwaysMinStrategy,
+        mimic_human_1.mimicHumanStrategy,
+        random_1.randomStrategy,
+        remainder_1.remainderStrategy
     ];
 }
 exports.getStrategies = getStrategies;
-class RandomStrategy {
-    getNextTurn(heapSize, previousTurn) {
-        return Math.floor(Math.random() * util_1.getMaxTokensToRemove(heapSize)) + 1;
-    }
-}
-exports.RandomStrategy = RandomStrategy;
-class AlwaysOneStrategy {
-    getNextTurn(heapSize, previousTurn) {
-        return 1;
-    }
-}
-exports.AlwaysOneStrategy = AlwaysOneStrategy;
-class MimicHumanStrategy {
-    getNextTurn(heapSize, previousTurn) {
-        let tokensToRemove = 1;
-        if (!isUndefined(previousTurn)) {
-            tokensToRemove = Math.min(previousTurn.tokensRemoved, util_1.getMaxTokensToRemove(heapSize));
-        }
-        return tokensToRemove;
-    }
-}
-exports.MimicHumanStrategy = MimicHumanStrategy;
-class RemainderStrategy {
-    getNextTurn(heapSize, previousTurn) {
-        const remainderAfterDivisionBy4 = heapSize % 4;
-        switch (remainderAfterDivisionBy4) {
-            case 0:
-                return 3;
-            case 1:
-                return 1;
-            case 2:
-                return 1;
-            case 3:
-                return 2;
-        }
-    }
-}
-exports.RemainderStrategy = RemainderStrategy;
-function isUndefined(previousTurn) {
-    return (typeof previousTurn === 'undefined');
-}

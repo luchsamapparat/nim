@@ -1,119 +1,151 @@
-import { AlwaysOneStrategy, MimicHumanStrategy, NimGame, Player, RandomStrategy, RemainderStrategy, Round, Strategy } from '../index';
-import { getMockStrategy, HEAP_SIZE, MAX_TOKENS_TO_REMOVE, MIN_TOKENS_TO_REMOVE, playGame } from './test-util';
+import { findLast, first, last, range } from 'lodash';
+import { GameConfig, GameState, NimGame, Player, Strategy, getStrategies } from '../index';
+import { getMockStrategy, playGame } from './test-util';
 
-const strategies = [
-    RandomStrategy,
-    AlwaysOneStrategy,
-    MimicHumanStrategy,
-    RemainderStrategy
-];
+const gameConfig: GameConfig = {
+    heapSize: 13,
+    minTokensToRemove: 1,
+    maxTokensToRemove: 3,
+    startingPlayer: Player.Human,
+    strategy: getMockStrategy()
+};
 
-strategies.forEach(StrategyCls => {
+// tslint:disable-next-line:variable-name
+getStrategies().forEach(strategyFactory => {
+    const strategy = strategyFactory();
 
-    describe(`NimGame with ${StrategyCls.name}`, () => {
-        const strategy = new StrategyCls();
-
+    describe(`NimGame with ${strategyFactory.name}`, () => {
         test('the initial heap size is configurable', () => {
-            const nimGame = new NimGame(HEAP_SIZE, Player.Human, strategy);
-            const round = nimGame.start();
+            const nimGame = new NimGame({
+                ...gameConfig,
+                strategy
+            });
+            const gameState = nimGame.start();
 
-            expect(round.heapSize).toBe(HEAP_SIZE);
+            expect(gameState.heapSize).toBe(13);
         });
 
         test('the game has to be started before playing rounds', () => {
-            const nimGameWithMachineStarting = new NimGame(HEAP_SIZE, Player.Machine, strategy);
-            const nimGameWithHumanStarting = new NimGame(HEAP_SIZE, Player.Machine, strategy);
+            const nimGameWithMachineStarting = new NimGame({
+                ...gameConfig,
+                startingPlayer: Player.Machine,
+                strategy
+            });
+            const nimGameWithHumanStarting = new NimGame({
+                ...gameConfig,
+                startingPlayer: Player.Machine,
+                strategy
+            });
 
-            expect(() => nimGameWithMachineStarting.playRound(MIN_TOKENS_TO_REMOVE)).toThrowError();
-            expect(() => nimGameWithHumanStarting.playRound(MIN_TOKENS_TO_REMOVE)).toThrowError();
+            expect(() => nimGameWithMachineStarting.playRound(1)).toThrowError();
+            expect(() => nimGameWithHumanStarting.playRound(1)).toThrowError();
         });
 
         test('a player must remove at least one token', () => {
-            const nimGame = new NimGame(HEAP_SIZE, Player.Human, strategy);
-            const round = nimGame.start();
+            const nimGame = new NimGame({
+                ...gameConfig,
+                strategy
+            });
+            nimGame.start();
 
             expect(() => nimGame.playRound(0)).toThrowError();
         });
 
         test('a player must remove at the maximum three tokens', () => {
-            const nimGame = new NimGame(HEAP_SIZE, Player.Human, strategy);
-            const round = nimGame.start();
+            const nimGame = new NimGame({
+                ...gameConfig,
+                strategy
+            });
+            nimGame.start();
 
             expect(() => nimGame.playRound(4)).toThrowError();
         });
 
         test('a player can remove between one and three tokens', () => {
-            [1, 2, 3].forEach(tokensToRemove => {
-                const nimGame = new NimGame(HEAP_SIZE, Player.Human, strategy);
-                nimGame.start();
+            range(1, 3)
+                .forEach(tokensToRemove => {
+                    const nimGame = new NimGame({
+                        ...gameConfig,
+                        strategy
+                    });
+                    nimGame.start();
 
-                let round: Round;
+                    let gameState: GameState;
 
-                expect(() => {
-                    round = nimGame.playRound(tokensToRemove);
-                }).not.toThrowError();
+                    expect(() => {
+                        gameState = nimGame.playRound(tokensToRemove);
+                    }).not.toThrowError();
 
-                const humanTurn = round.turns[0];
-                expect(humanTurn.tokensRemoved).toBe(tokensToRemove);
+                    const humanTurn = first(gameState.turns);
+                    expect(humanTurn.tokensRemoved).toBe(tokensToRemove);
 
-                const machineTurn = round.turns[1];
-                expect(machineTurn.tokensRemoved).toBeGreaterThanOrEqual(MIN_TOKENS_TO_REMOVE);
-                expect(machineTurn.tokensRemoved).toBeLessThanOrEqual(MAX_TOKENS_TO_REMOVE);
-            });
+                    const machineTurn = last(gameState.turns);
+                    expect(machineTurn.tokensRemoved).toBeGreaterThanOrEqual(1);
+                    expect(machineTurn.tokensRemoved).toBeLessThanOrEqual(3);
+                });
         });
 
         test('the machine plays the first turn automatically when the game starts and it is the starting player', () => {
-            const nimGame = new NimGame(HEAP_SIZE, Player.Machine, strategy);
-            const round = nimGame.start();
+            const nimGame = new NimGame({
+                ...gameConfig,
+                startingPlayer: Player.Machine,
+                strategy
+            });
+            const gameState = nimGame.start();
 
-            expect(round.heapSize).toBeLessThan(HEAP_SIZE);
-            expect(round.heapSize).toBeGreaterThanOrEqual(HEAP_SIZE - MAX_TOKENS_TO_REMOVE);
-            expect(round.turns).toHaveLength(1);
+            expect(gameState.heapSize).toBeLessThan(13);
+            expect(gameState.heapSize).toBeGreaterThanOrEqual(13 - 3);
+            expect(gameState.turns).toHaveLength(1);
 
-            const machineTurn = round.turns[0];
+            const machineTurn = first(gameState.turns);
             expect(machineTurn.player).toBe(Player.Machine);
-            expect(machineTurn.tokensRemoved).toBeGreaterThanOrEqual(MIN_TOKENS_TO_REMOVE);
-            expect(machineTurn.tokensRemoved).toBeLessThanOrEqual(MAX_TOKENS_TO_REMOVE);
+            expect(machineTurn.tokensRemoved).toBeGreaterThanOrEqual(1);
+            expect(machineTurn.tokensRemoved).toBeLessThanOrEqual(3);
         });
 
         test('the machine plays its turn automatically after its opponents turn', () => {
-            const tokensToRemove = MIN_TOKENS_TO_REMOVE;
-            const nimGame = new NimGame(HEAP_SIZE, Player.Human, strategy);
+            const tokensToRemove = 1;
+            const nimGame = new NimGame({
+                ...gameConfig,
+                strategy
+            });
             nimGame.start();
 
-            const round = nimGame.playRound(tokensToRemove);
+            const gameState = nimGame.playRound(tokensToRemove);
 
-            const humanTurn = round.turns[0];
+            const humanTurn = findLast(gameState.turns, turn => turn.player === Player.Human);
             expect(humanTurn.player).toBe(Player.Human);
 
-            const machineTurn = round.turns[1];
+            const machineTurn = last(gameState.turns);
             expect(machineTurn.player).toBe(Player.Machine);
 
-            expect(round.heapSize).toBeLessThan(HEAP_SIZE - tokensToRemove);
+            expect(gameState.heapSize).toBeLessThan(13 - tokensToRemove);
         });
 
         describe('game ending', () => {
             let nimGame: NimGame;
-            let lastRound: Round;
+            let gameState: GameState;
 
             beforeEach(() => {
-                nimGame = new NimGame(HEAP_SIZE, Player.Human, strategy);
+                nimGame = new NimGame({
+                    ...gameConfig,
+                    strategy
+                });
                 nimGame.start();
-                lastRound = playGame(nimGame);
+                gameState = playGame(nimGame);
             });
 
-            test('the game ends when the heap size is 0', () => {
-                expect(lastRound.heapSize).toBe(0);
-                expect(lastRound.isFinished).toBe(true);
+            test.only('the game ends when the heap size is 0', () => {
+                expect(gameState.heapSize).toBe(0);
             });
 
             test('the last round declares a winner', () => {
-                expect(lastRound.winner).not.toBeNull();
-                expect([Player.Machine, Player.Human]).toContain(lastRound.winner);
+                expect(gameState.winner).not.toBeNull();
+                expect([Player.Machine, Player.Human]).toContain(gameState.winner);
             });
 
             test('it is not possible to play another round after the game has finished', () => {
-                expect(() => nimGame.playRound(MIN_TOKENS_TO_REMOVE)).toThrowError();
+                expect(() => nimGame.playRound(1)).toThrowError();
             });
         });
 
@@ -122,7 +154,7 @@ strategies.forEach(StrategyCls => {
 });
 
 describe('machine strategy', () => {
-    let mockStrategy: Strategy;
+    let mockStrategy;
     let getNextTurn: jest.SpyInstance;
     let nimGame: NimGame;
 
@@ -132,25 +164,28 @@ describe('machine strategy', () => {
     });
 
     test('when the machine is the starting player, it receives the current heap size to make its decision', () => {
-        nimGame = new NimGame(HEAP_SIZE, Player.Machine, mockStrategy);
+        nimGame = new NimGame({
+            ...gameConfig,
+            startingPlayer: Player.Machine,
+            strategy: mockStrategy
+        });
         nimGame.start();
 
-        expect(getNextTurn).toHaveBeenLastCalledWith(HEAP_SIZE, undefined);
+        expect(getNextTurn).toHaveBeenLastCalledWith({});
     });
 
     test('the machine receives the current heap size to make its decision', () => {
-        nimGame = new NimGame(HEAP_SIZE, Player.Human, mockStrategy);
+        const tokensToRemove = 1;
+        nimGame = new NimGame({
+            ...gameConfig,
+            startingPlayer: Player.Human,
+            strategy: mockStrategy
+        });
         nimGame.start();
 
-        const round = nimGame.playRound(1);
-        const heapSizeAfterHumanTurn = HEAP_SIZE - round.turns[0].tokensRemoved;
+        const gameState = nimGame.playRound(tokensToRemove);
+        const heapSizeAfterHumanTurn = 13 - findLast(gameState.turns, turn => turn.player === Player.Human).tokensRemoved;
 
-        expect(getNextTurn).toHaveBeenLastCalledWith(
-            heapSizeAfterHumanTurn,
-            {
-                player: Player.Human,
-                tokensRemoved: 1
-            }
-        );
+        expect(getNextTurn).toHaveBeenLastCalledWith({});
     });
 });

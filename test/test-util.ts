@@ -1,22 +1,24 @@
-import { NimGame, Round, Strategy } from '../index';
+import { isNull, random } from 'lodash';
+import { GameConfig, GameState, NimGame, Player, Strategy } from '../index';
 
-export const HEAP_SIZE = 13;
-export const MIN_TOKENS_TO_REMOVE = 1;
-export const MAX_TOKENS_TO_REMOVE = 3;
+export function playGame(nimGame: NimGame): GameState {
+    const gameState = nimGame.playRound(1);
 
-export function playGame(
-    nimGame: NimGame,
-    expectForEachRound: (round: Round) => void = () => undefined
-): Round {
-    const round = nimGame.playRound(MIN_TOKENS_TO_REMOVE);
-
-    expectForEachRound(round);
-
-    return round.isFinished ? round : playGame(nimGame);
+    return isNull(gameState.winner) ? playGame(nimGame) : gameState;
 }
 
 export function getMockStrategy(): Strategy {
     return {
-        getNextTurn: jest.fn(() => 1)
+        getNextTurn: jest.fn((heapSize: number, minTokensToRemove: number, maxTokensToRemove: number) => random(minTokensToRemove, maxTokensToRemove))
+    };
+}
+
+export function getMockConfig(): GameConfig {
+    return {
+        heapSize: 13,
+        minTokensToRemove: 1,
+        maxTokensToRemove: 3,
+        startingPlayer: Player.Human,
+        strategy: getMockStrategy()
     };
 }

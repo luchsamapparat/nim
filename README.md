@@ -21,49 +21,87 @@ Install dependcies first via `npm install`. Then...
 ### Basic Usage
 
 ```ts
-import { NimGame, Player } from '@luchsamapparat/nim';
+import { NimGame, Player, remainderStrategy } from '@luchsamapparat/nim';
 
-const heapSize = 13;
-const startingPlayer = Player.Human;
+const nimGame = new NimGame({
+    heapSize: 13,
+    minTokensToRemove: 1,
+    maxTokensToRemove: 3,
+    startingPlayer: Player.Human,
+    strategy: remainderStrategy()
+});
 
-const nimGame = new NimGame(heapSize, startingPlayer);
-const round = nimGame.start();
+let gameState = nimGame.start();
 
-// round = {
-//     turns: [],
+// gameState = {
+//     config: {
+//         heapSize: 13,
+//         minTokensToRemove: 1,
+//         maxTokensToRemove: 3,
+//         startingPlayer: Player.Human,
+//         strategy: {
+//             getNextTurn: ...
+//         }
+//     },
 //     heapSize: 13,
-//     isFinished: false,
+//     minTokensAllowedToRemove: 1,
+//     maxTokensAllowedToRemove: 3,
+//     started: true,
+//     turns: [],
 //     winner: null
 // }
 
-const lastRound = nimGame.playRound(2);
+gameState = nimGame.playRound(2);
 
-// lastRound = {
+// gameState = {
+//     config: {
+//         ...
+//     },
+//     heapSize: 8,
+//     minTokensAllowedToRemove: 1,
+//     maxTokensAllowedToRemove: 3,
+//     started: true,
 //     turns: [
 //         { player: 'Human', tokensRemoved: 2 },
 //         { player: 'Machine', tokensRemoved: 3 }
 //     ],
-//   heapSize: 8,
-//   isFinished: false,
-//   winner: null
+//     winner: null
 // }
-
-const maxTokensToRemove = nimGame.getMaxTokensToRemove();
-
-// maxTokensToRemove = 3;
 ```
 
 ### Using a Strategy
 
 ```ts
-import { NimGame, Player, RandomStrategy, AlwaysOneStrategy } from '@luchsamapparat/nim';
+import { NimGame, Player, remainderStrategy } from '@luchsamapparat/nim';
 
-const heapSize = 13;
-const startingPlayer = Player.Human;
+const gameConfig = {
+    heapSize: 13,
+    minTokensToRemove: 1,
+    maxTokensToRemove: 3,
+    startingPlayer: Player.Human,
+};
 
-// computer removes randomly removes 1 to 3 tokens
-new NimGame(heapSize, startingPlayer, new RandomStrategy();
+// the computer always removes the minimum allowed number of tokens
+new NimGame({
+    ...gameConfig,
+    strategy: alwaysMinStrategy()
+});
 
-// computer always removes 1 token
-new NimGame(heapSize, startingPlayer, new AlwaysOneStrategy();
+// the computer always removes the same number of tokens as the opponent did 
+new NimGame({
+    ...gameConfig,
+    strategy: mimicHumanStrategy()
+});
+
+// the computer removes randomly removes tokens according to the minimum and maximun allowed number of tokens
+new NimGame({
+    ...gameConfig,
+    strategy: randomStrategy()
+});
+
+// the computer tries to leave the minimum allowed number of tokens to the opponent in the last round
+new NimGame({
+    ...gameConfig,
+    strategy: remainderStrategy()
+});
 ```

@@ -1,110 +1,106 @@
-import { RemainderStrategy, Strategy } from './strategy';
-import { getMaxTokensToRemove } from './util';
-
-export enum Player {
-    Human = 'Human',
-    Machine = 'Machine'
-}
-
-export interface Turn {
-    player: Player;
-    tokensRemoved: number;
-}
-
-export interface Round {
-    turns: Turn[];
-    heapSize: number;
-    winner: Player | null;
-    isFinished: boolean;
-}
+import { inRange, isNull } from 'lodash';
+import { GameConfig, GameState, Player } from './nim.model';
 
 export class NimGame {
 
-    private started = false;
-    private winner: Player = null;
+    private gameState: GameState;
 
     constructor(
-        private heapSize: number,
-        private startingPlayer: Player,
-        private strategy: Strategy = new RemainderStrategy()
-    ) {}
-
-    public start() {
-        const turns = (this.startingPlayer === Player.Human) ? [] : [this.playMachineTurn()];
-        this.started = true;
-        return this.toRound(turns);
+        config: GameConfig
+    ) {
+        this.gameState = this.getInitialGameState(config);
     }
 
-    public playRound(tokensToRemove: number): Round {
-        if (!this.started) {
+    public start(): GameState {
+        let gameState = this.gameState;
+
+        gameState = {
+            ...gameState,
+            started: true
+        };
+
+        if (this.gameState.config.startingPlayer === Player.Machine) {
+            gameState = {
+                ...gameState,
+                ...this.playMachineTurn(gameState)
+            };
+        }
+
+        this.gameState = gameState;
+
+        return gameState;
+    }
+
+    public playRound(tokensToRemove: number): GameState {
+        let gameState = this.gameState;
+
+        if (!gameState.started) {
             throw new Error(`You must start the game first.`);
         }
 
-        if (!this.isValidTurn(tokensToRemove)) {
-            throw new Error(`You may remove between 1 to ${getMaxTokensToRemove(this.heapSize)} tokens from the heap.`);
+        gameState = this.playHumanTurn(gameState, tokensToRemove);
+
+        if (isNull(gameState.winner)) {
+            gameState = this.playMachineTurn(gameState);
         }
 
-        const humanTurn = this.playHumanTurn(tokensToRemove);
-        const machineTurn = this.playMachineTurn(humanTurn);
+        this.gameState = gameState;
 
-        const turns = [
-            ...((humanTurn === null) ? [] : [humanTurn]),
-            ...((machineTurn === null) ? [] : [machineTurn]),
-        ];
-
-        return this.toRound(turns);
+        return gameState;
     }
 
-    private playHumanTurn(tokensToRemove: number) {
-        if (this.isFinished) {
-            return null;
-        }
-
-        return this.playTurn(Player.Human, tokensToRemove);
-    }
-
-    private playMachineTurn(humanTurn?: Turn) {
-        if (this.isFinished) {
-            return null;
-        }
-
-        return this.playTurn(Player.Machine, this.strategy.getNextTurn(this.heapSize, humanTurn));
-    }
-
-    private playTurn(player: Player, tokensToRemove: number): Turn {
-        this.removeTokensFromHeap(tokensToRemove);
-
-        if (this.isFinished) {
-            this.winner = (player === Player.Machine) ? Player.Human : Player.Machine;
-        }
-
-        return {
-            player,
-            tokensRemoved: tokensToRemove
-        };
-    }
-
-    private removeTokensFromHeap(tokensToRemove: number) {
-        this.heapSize = this.heapSize - tokensToRemove;
-    }
-
-    private get isFinished() {
-        return (this.heapSize === 0);
-    }
-
-    private isValidTurn(tokensToRemove: number) {
-        return (
-            tokensToRemove > 0 &&
-            tokensToRemove <= getMaxTokensToRemove(this.heapSize)
+    private playHumanTurn(gameState: GameState, tokensToRemove: number): GameState {
+        return this.playTurn(
+            gameState,
+            Player.Human,
+            tokensToRemove
         );
     }
 
-    private toRound(turns: Turn[]): Round {
+    private playMachineTurn(gameState: GameState): GameState {
+        return this.playTurn(
+            gameState,
+            Player.Machine,
+            this.gameState.config.strategy.getNextTurn(gameState)
+        );
+    }
+
+    private playTurn(gameState: GameState, player: Player, tokensToRemove: number): GameState {
+        if (!isNull(gameState.winner)) {
+            throw new Error(`The game has already ended. ${gameState.winner} is the winner.`);
+        }
+
+        if (!inRange(tokensToRemove, gameState.minTokensAllowedToRemove, gameState.maxTokensAllowedToRemove + 1)) {
+            throw new Error(`You may remove between ${gameState.minTokensAllowedToRemove} and ${gameState.maxTokensAllowedToRemove} tokens from the heap.`);
+        }
+
+        const turn = {
+            player,
+            tokensRemoved: tokensToRemove
+        };
+        const newHeapSize = gameState.heapSize - tokensToRemove;
+
         return {
-            turns,
-            heapSize: this.heapSize,
-            isFinished: this.isFinished,
-            winner: this.winner
+            ...gameState,
+            heapSize: newHeapSize,
+            turns: [
+                ...gameState.turns,
+                turn
+            ],
+            maxTokensAllowedToRemove: newHeapSize > this.gameState.config.maxTokensToRemove ? this.gameState.config.maxTokensToRemove : newHeapSize,
+            winner: (newHeapSize === 0) ? player : null
+        };
+    }
+
+    private getInitialGameState(config: GameConfig): GameState {
+        return {
+            heapSize: config.heapSize,
+            minTokensAllowedToRemove: config.minTokensToRemove,
+            maxTokensAllowedToRemove: config.maxTokensToRemove,
+            started: false,
+            turns: [],
+            winner: null,
+            config
         };
     }
 

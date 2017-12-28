@@ -4,5 +4,9 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./src/nim"));
+__export(require("./src/nim.model"));
 __export(require("./src/strategy"));
-__export(require("./src/util"));
+__export(require("./src/strategy/always-min"));
+__export(require("./src/strategy/mimic-human"));
+__export(require("./src/strategy/random"));
+__export(require("./src/strategy/remainder"));

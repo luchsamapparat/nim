@@ -33,6 +33,7 @@
   "homepage": "https://github.com/luchsamapparat/nim#readme",
   "devDependencies": {
     "@types/jest": "^21.1.9",
+    "@types/lodash": "^4.14.91",
     "jest": "^22.0.4",
     "npm-run-all": "^4.1.2",
     "rimraf": "^2.6.2",
@@ -42,5 +43,7 @@
     "tslint-config-luchsamapparat": "^1.1.0",
     "typescript": "^2.6.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "lodash": "^4.17.4"
+  }
 }

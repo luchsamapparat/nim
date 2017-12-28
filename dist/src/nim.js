@@ -1,78 +1,64 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const strategy_1 = require("./strategy");
-const util_1 = require("./util");
-var Player;
-(function (Player) {
-    Player["Human"] = "Human";
-    Player["Machine"] = "Machine";
-})(Player = exports.Player || (exports.Player = {}));
+const lodash_1 = require("lodash");
+const nim_model_1 = require("./nim.model");
 class NimGame {
-    constructor(heapSize, startingPlayer, strategy = new strategy_1.RemainderStrategy()) {
-        this.heapSize = heapSize;
-        this.startingPlayer = startingPlayer;
-        this.strategy = strategy;
-        this.started = false;
-        this.winner = null;
+    constructor(config) {
+        this.gameState = this.getInitialGameState(config);
     }
     start() {
-        const turns = (this.startingPlayer === Player.Human) ? [] : [this.playMachineTurn()];
-        this.started = true;
-        return this.toRound(turns);
+        let gameState = this.gameState;
+        gameState = Object.assign({}, gameState, { started: true });
+        if (this.gameState.config.startingPlayer === nim_model_1.Player.Machine) {
+            gameState = Object.assign({}, gameState, this.playMachineTurn(gameState));
+        }
+        this.gameState = gameState;
+        return gameState;
     }
     playRound(tokensToRemove) {
-        if (!this.started) {
+        let gameState = this.gameState;
+        if (!gameState.started) {
             throw new Error(`You must start the game first.`);
         }
-        if (!this.isValidTurn(tokensToRemove)) {
-            throw new Error(`You may remove between 1 to ${util_1.getMaxTokensToRemove(this.heapSize)} tokens from the heap.`);
+        gameState = this.playHumanTurn(gameState, tokensToRemove);
+        if (lodash_1.isNull(gameState.winner)) {
+            gameState = this.playMachineTurn(gameState);
         }
-        const humanTurn = this.playHumanTurn(tokensToRemove);
-        const machineTurn = this.playMachineTurn(humanTurn);
-        const turns = [
-            ...((humanTurn === null) ? [] : [humanTurn]),
-            ...((machineTurn === null) ? [] : [machineTurn]),
-        ];
-        return this.toRound(turns);
+        this.gameState = gameState;
+        return gameState;
     }
-    playHumanTurn(tokensToRemove) {
-        if (this.isFinished) {
-            return null;
-        }
-        return this.playTurn(Player.Human, tokensToRemove);
+    playHumanTurn(gameState, tokensToRemove) {
+        return this.playTurn(gameState, nim_model_1.Player.Human, tokensToRemove);
     }
-    playMachineTurn(humanTurn) {
-        if (this.isFinished) {
-            return null;
-        }
-        return this.playTurn(Player.Machine, this.strategy.getNextTurn(this.heapSize, humanTurn));
+    playMachineTurn(gameState) {
+        return this.playTurn(gameState, nim_model_1.Player.Machine, this.gameState.config.strategy.getNextTurn(gameState));
     }
-    playTurn(player, tokensToRemove) {
-        this.removeTokensFromHeap(tokensToRemove);
-        if (this.isFinished) {
-            this.winner = (player === Player.Machine) ? Player.Human : Player.Machine;
+    playTurn(gameState, player, tokensToRemove) {
+        if (!lodash_1.isNull(gameState.winner)) {
+            throw new Error(`The game has already ended. ${gameState.winner} is the winner.`);
         }
-        return {
+        if (!lodash_1.inRange(tokensToRemove, gameState.minTokensAllowedToRemove, gameState.maxTokensAllowedToRemove + 1)) {
+            throw new Error(`You may remove between ${gameState.minTokensAllowedToRemove} and ${gameState.maxTokensAllowedToRemove} tokens from the heap.`);
+        }
+        const turn = {
             player,
             tokensRemoved: tokensToRemove
         };
+        const newHeapSize = gameState.heapSize - tokensToRemove;
+        return Object.assign({}, gameState, { heapSize: newHeapSize, turns: [
+                ...gameState.turns,
+                turn
+            ], maxTokensAllowedToRemove: newHeapSize > this.gameState.config.maxTokensToRemove ? this.gameState.config.maxTokensToRemove : newHeapSize, winner: (newHeapSize === 0) ? player : null });
     }
-    removeTokensFromHeap(tokensToRemove) {
-        this.heapSize = this.heapSize - tokensToRemove;
-    }
-    get isFinished() {
-        return (this.heapSize === 0);
-    }
-    isValidTurn(tokensToRemove) {
-        return (tokensToRemove > 0 &&
-            tokensToRemove <= util_1.getMaxTokensToRemove(this.heapSize));
-    }
-    toRound(turns) {
+    getInitialGameState(config) {
         return {
-            turns,
-            heapSize: this.heapSize,
-            isFinished: this.isFinished,
-            winner: this.winner
+            heapSize: config.heapSize,
+            minTokensAllowedToRemove: config.minTokensToRemove,
+            maxTokensAllowedToRemove: config.maxTokensToRemove,
+            started: false,
+            turns: [],
+            winner: null,
+            config
         };
     }
 }
