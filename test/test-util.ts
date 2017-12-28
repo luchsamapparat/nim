@@ -9,7 +9,9 @@ export function playGame(nimGame: NimGame): GameState {
 
 export function getMockStrategy(): Strategy {
     return {
-        getNextTurn: jest.fn((heapSize: number, minTokensToRemove: number, maxTokensToRemove: number) => random(minTokensToRemove, maxTokensToRemove))
+        getNextTurn: jest.fn(
+            (gameState: GameState) => random(gameState.minTokensAllowedToRemove, gameState.maxTokensAllowedToRemove)
+        )
     };
 }
 

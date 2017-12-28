@@ -135,7 +135,7 @@ getStrategies().forEach(strategyFactory => {
                 gameState = playGame(nimGame);
             });
 
-            test.only('the game ends when the heap size is 0', () => {
+            test('the game ends when the heap size is 0', () => {
                 expect(gameState.heapSize).toBe(0);
             });
 
@@ -163,29 +163,47 @@ describe('machine strategy', () => {
         getNextTurn = (<any> mockStrategy.getNextTurn);
     });
 
-    test('when the machine is the starting player, it receives the current heap size to make its decision', () => {
-        nimGame = new NimGame({
+    test('when the machine is the starting player, it receives the current game state to make its decision', () => {
+        const config = {
             ...gameConfig,
             startingPlayer: Player.Machine,
             strategy: mockStrategy
-        });
+        };
+        nimGame = new NimGame(config);
         nimGame.start();
 
-        expect(getNextTurn).toHaveBeenLastCalledWith({});
+        const passedGameState: GameState = getNextTurn.mock.calls[0][0];
+
+        expect(passedGameState.config).toEqual(config);
+        expect(passedGameState.heapSize).toBe(config.heapSize);
+        expect(passedGameState.minTokensAllowedToRemove).toBe(gameConfig.minTokensToRemove);
+        expect(passedGameState.maxTokensAllowedToRemove).toBe(gameConfig.maxTokensToRemove);
+        expect(passedGameState.turns).toHaveLength(0);
+        expect(passedGameState.winner).toBeNull();
     });
 
-    test('the machine receives the current heap size to make its decision', () => {
+    test('the machine receives the current game state to make its decision', () => {
         const tokensToRemove = 1;
-        nimGame = new NimGame({
+        const config = {
             ...gameConfig,
             startingPlayer: Player.Human,
             strategy: mockStrategy
-        });
+        };
+        nimGame = new NimGame(config);
         nimGame.start();
 
         const gameState = nimGame.playRound(tokensToRemove);
-        const heapSizeAfterHumanTurn = 13 - findLast(gameState.turns, turn => turn.player === Player.Human).tokensRemoved;
+        const heapSizeAfterHumanTurn = 13 - tokensToRemove;
 
-        expect(getNextTurn).toHaveBeenLastCalledWith({});
+        const passedGameState: GameState = getNextTurn.mock.calls[0][0];
+
+        expect(passedGameState.config).toEqual(config);
+        expect(passedGameState.heapSize).toBe(heapSizeAfterHumanTurn);
+        expect(passedGameState.minTokensAllowedToRemove).toBe(gameConfig.minTokensToRemove);
+        expect(passedGameState.maxTokensAllowedToRemove).toBe(gameConfig.maxTokensToRemove);
+        expect(passedGameState.turns).toHaveLength(1);
+        expect(passedGameState.turns[0].player).toBe(Player.Human);
+        expect(passedGameState.turns[0].tokensRemoved).toBe(tokensToRemove);
+        expect(passedGameState.winner).toBeNull();
     });
 });
