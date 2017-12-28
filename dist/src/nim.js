@@ -2,64 +2,84 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const lodash_1 = require("lodash");
 const nim_model_1 = require("./nim.model");
-class NimGame {
-    constructor(config) {
-        this.gameState = this.getInitialGameState(config);
-    }
-    start() {
-        let gameState = this.gameState;
-        gameState = Object.assign({}, gameState, { started: true });
-        if (this.gameState.config.startingPlayer === nim_model_1.Player.Machine) {
-            gameState = Object.assign({}, gameState, this.playMachineTurn(gameState));
-        }
-        this.gameState = gameState;
-        return gameState;
-    }
-    playRound(tokensToRemove) {
-        let gameState = this.gameState;
-        if (!gameState.started) {
-            throw new Error(`You must start the game first.`);
-        }
-        gameState = this.playHumanTurn(gameState, tokensToRemove);
-        if (lodash_1.isNull(gameState.winner)) {
-            gameState = this.playMachineTurn(gameState);
-        }
-        this.gameState = gameState;
-        return gameState;
-    }
-    playHumanTurn(gameState, tokensToRemove) {
-        return this.playTurn(gameState, nim_model_1.Player.Human, tokensToRemove);
-    }
-    playMachineTurn(gameState) {
-        return this.playTurn(gameState, nim_model_1.Player.Machine, this.gameState.config.strategy.getNextTurn(gameState));
-    }
-    playTurn(gameState, player, tokensToRemove) {
-        if (!lodash_1.isNull(gameState.winner)) {
-            throw new Error(`The game has already ended. ${gameState.winner} is the winner.`);
-        }
-        if (!lodash_1.inRange(tokensToRemove, gameState.minTokensAllowedToRemove, gameState.maxTokensAllowedToRemove + 1)) {
-            throw new Error(`You may remove between ${gameState.minTokensAllowedToRemove} and ${gameState.maxTokensAllowedToRemove} tokens from the heap.`);
-        }
-        const turn = {
-            player,
-            tokensRemoved: tokensToRemove
-        };
-        const newHeapSize = gameState.heapSize - tokensToRemove;
-        return Object.assign({}, gameState, { heapSize: newHeapSize, turns: [
-                ...gameState.turns,
-                turn
-            ], maxTokensAllowedToRemove: newHeapSize > this.gameState.config.maxTokensToRemove ? this.gameState.config.maxTokensToRemove : newHeapSize, winner: (newHeapSize === 0) ? player : null });
-    }
-    getInitialGameState(config) {
-        return {
-            heapSize: config.heapSize,
-            minTokensAllowedToRemove: config.minTokensToRemove,
-            maxTokensAllowedToRemove: config.maxTokensToRemove,
-            started: false,
-            turns: [],
-            winner: null,
-            config
-        };
-    }
+function startGame(config) {
+    return lodash_1.flow(getStateFromConfig(), when(isStartingPlayer(nim_model_1.Player.Machine), playMachineTurn()), toGame())(config);
 }
-exports.NimGame = NimGame;
+exports.startGame = startGame;
+function playRound(gameState, tokensToRemove) {
+    return lodash_1.flow(playHumanTurn(tokensToRemove), when(lodash_1.negate(isFinished()), playMachineTurn()), toGame())(gameState);
+}
+function getPlayNextRound(gameState) {
+    return isFinished()(gameState) ? null : lodash_1.partial(playRound, gameState);
+}
+function toGame() {
+    return gameState => ({
+        state: gameState,
+        playNextRound: getPlayNextRound(gameState)
+    });
+}
+function getStateFromConfig() {
+    return (gameConfig) => ({
+        heapSize: gameConfig.heapSize,
+        minTokensAllowedToRemove: gameConfig.minTokensToRemove,
+        maxTokensAllowedToRemove: gameConfig.maxTokensToRemove,
+        turns: [],
+        winner: null,
+        config: gameConfig
+    });
+}
+function playHumanTurn(tokensToRemove) {
+    return playTurn(nim_model_1.Player.Human, tokensToRemove);
+}
+function playMachineTurn() {
+    return gameState => {
+        return playTurn(nim_model_1.Player.Machine, getNextTurn(gameState))(gameState);
+    };
+}
+function getNextTurn(gameState) {
+    return gameState.config.strategy.getNextTurn(gameState);
+}
+function playTurn(player, tokensToRemove) {
+    return lodash_1.flow(abortIf(isInvalidTurn(tokensToRemove), ({ minTokensAllowedToRemove, maxTokensAllowedToRemove }) => `You may remove between ${minTokensAllowedToRemove} and ${maxTokensAllowedToRemove} tokens from the heap.`), updateHeapSize(tokensToRemove), updateMaxTokensAllowedToRemove(), addTurn(player, tokensToRemove), when(isFinished(), updateWinner(player)));
+}
+function addTurn(player, tokensRemoved) {
+    return gameState => (Object.assign({}, gameState, { turns: [
+            ...gameState.turns,
+            toTurn(player, tokensRemoved)
+        ] }));
+}
+function toTurn(player, tokensRemoved) {
+    return {
+        player,
+        tokensRemoved
+    };
+}
+function updateHeapSize(tokensToRemove) {
+    return gameState => (Object.assign({}, gameState, { heapSize: gameState.heapSize - tokensToRemove }));
+}
+function updateMaxTokensAllowedToRemove() {
+    return gameState => (Object.assign({}, gameState, { maxTokensAllowedToRemove: Math.min(gameState.config.maxTokensToRemove, gameState.heapSize) }));
+}
+function updateWinner(winner) {
+    return gameState => (Object.assign({}, gameState, { winner }));
+}
+function isInvalidTurn(tokensToRemove) {
+    return ({ minTokensAllowedToRemove, maxTokensAllowedToRemove }) => !lodash_1.inRange(tokensToRemove, minTokensAllowedToRemove, maxTokensAllowedToRemove + 1);
+}
+function isStartingPlayer(player) {
+    return ({ config }) => (config.startingPlayer === player);
+}
+function isFinished() {
+    return ({ heapSize }) => (heapSize === 0);
+}
+function abortIf(predicate, errorMessageFn) {
+    return gameState => {
+        if (predicate(gameState)) {
+            throw new Error(errorMessageFn(gameState));
+        }
+        return gameState;
+    };
+}
+function when(predicate, whenTrueFn) {
+    return gameState => predicate(gameState) ? whenTrueFn(gameState) : gameState;
+}

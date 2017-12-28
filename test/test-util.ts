@@ -1,10 +1,10 @@
 import { isNull, random } from 'lodash';
-import { GameConfig, GameState, Player, Strategy, playRound } from '../index';
+import { Game, GameConfig, GameState, Player, Strategy } from '../index';
 
-export function playGame(gameState: GameState): GameState {
-    const updatedGameState = playRound(gameState, 1);
+export function playGame(game: Game): Game {
+    const updatedGame = game.playNextRound(1);
 
-    return isNull(updatedGameState.winner) ? playGame(updatedGameState) : updatedGameState;
+    return isNull(updatedGame.state.winner) ? playGame(updatedGame) : updatedGame;
 }
 
 export function getMockStrategy(): Strategy {

@@ -2,6 +2,11 @@ export declare enum Player {
     Human = "Human",
     Machine = "Machine",
 }
+export interface Game {
+    state: GameState;
+    playNextRound: PlayNextRound | null;
+}
+export declare type PlayNextRound = (tokensToRemove: number) => Game;
 export interface GameConfig {
     heapSize: number;
     minTokensToRemove: number;
@@ -13,7 +18,6 @@ export interface GameState {
     heapSize: number;
     minTokensAllowedToRemove: number;
     maxTokensAllowedToRemove: number;
-    started: boolean;
     turns: Turn[];
     winner: Player | null;
     config: GameConfig;

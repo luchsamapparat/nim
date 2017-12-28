@@ -1,81 +1,138 @@
-import { inRange, isNull } from 'lodash';
-import { GameConfig, GameState, Player } from './nim.model';
+import { flow, inRange, negate, partial } from 'lodash';
+import { Game, GameConfig, GameState, PlayNextRound, Player, Turn } from './nim.model';
 
-export function playNim(config: GameConfig) {
-    let gameState = getInitialGameState(config);
+type GameFn = (gameState: GameState) => GameState;
+type GamePredicate = (gameState: GameState) => boolean;
 
-    if (gameState.config.startingPlayer === Player.Machine) {
-        gameState = {
-            ...gameState,
-            ...playMachineTurn(gameState)
-        };
-    }
-
-    return gameState;
+export function startGame(config: GameConfig): Game {
+    return flow(
+        getStateFromConfig(),
+        when(isStartingPlayer(Player.Machine), playMachineTurn()),
+        toGame()
+    )(config);
 }
 
-function getInitialGameState(config: GameConfig): GameState {
-    return {
-        heapSize: config.heapSize,
-        minTokensAllowedToRemove: config.minTokensToRemove,
-        maxTokensAllowedToRemove: config.maxTokensToRemove,
+function playRound(gameState: GameState, tokensToRemove: number): Game {
+    return flow(
+        playHumanTurn(tokensToRemove),
+        when(negate(isFinished()), playMachineTurn()),
+        toGame()
+    )(gameState);
+}
+
+function getPlayNextRound(gameState: GameState): PlayNextRound | null {
+    return isFinished()(gameState) ? null : partial(playRound, gameState);
+}
+
+function toGame(): (gameState: GameState) => Game {
+    return gameState => ({
+        state: gameState,
+        playNextRound: getPlayNextRound(gameState)
+    });
+}
+
+function getStateFromConfig(): (gameConfig: GameConfig) => GameState {
+    return (gameConfig: GameConfig) => ({
+        heapSize: gameConfig.heapSize,
+        minTokensAllowedToRemove: gameConfig.minTokensToRemove,
+        maxTokensAllowedToRemove: gameConfig.maxTokensToRemove,
         turns: [],
         winner: null,
-        config
-    };
+        config: gameConfig
+    });
 }
 
-export function playRound(gameState: GameState, tokensToRemove: number): GameState {
-    let updatedGameState = gameState;
 
-    updatedGameState = playHumanTurn(updatedGameState, tokensToRemove);
-
-    if (isNull(updatedGameState.winner)) {
-        updatedGameState = playMachineTurn(updatedGameState);
-    }
-
-    return updatedGameState;
-}
-
-function playHumanTurn(gameState: GameState, tokensToRemove: number): GameState {
+function playHumanTurn(tokensToRemove: number): GameFn {
     return playTurn(
-        gameState,
         Player.Human,
         tokensToRemove
     );
 }
 
-function playMachineTurn(gameState: GameState): GameState {
-    return playTurn(
-        gameState,
-        Player.Machine,
-        gameState.config.strategy.getNextTurn(gameState)
+function playMachineTurn(): GameFn {
+    return gameState => {
+        return playTurn(Player.Machine, getNextTurn(gameState))(gameState);
+    };
+}
+
+function getNextTurn(gameState: GameState): number {
+    return gameState.config.strategy.getNextTurn(gameState);
+}
+
+function playTurn(player: Player, tokensToRemove: number): GameFn {
+    return flow(
+        abortIf(
+            isInvalidTurn(tokensToRemove),
+            ({minTokensAllowedToRemove, maxTokensAllowedToRemove }) => `You may remove between ${minTokensAllowedToRemove} and ${maxTokensAllowedToRemove} tokens from the heap.`
+        ),
+        updateHeapSize(tokensToRemove),
+        updateMaxTokensAllowedToRemove(),
+        addTurn(player, tokensToRemove),
+        when(isFinished(), updateWinner(player))
     );
 }
 
-function playTurn(gameState: GameState, player: Player, tokensToRemove: number): GameState {
-    if (!isNull(gameState.winner)) {
-        throw new Error(`The game has already ended. ${gameState.winner} is the winner.`);
-    }
-
-    if (!inRange(tokensToRemove, gameState.minTokensAllowedToRemove, gameState.maxTokensAllowedToRemove + 1)) {
-        throw new Error(`You may remove between ${gameState.minTokensAllowedToRemove} and ${gameState.maxTokensAllowedToRemove} tokens from the heap.`);
-    }
-
-    const turn = {
-        player,
-        tokensRemoved: tokensToRemove
-    };
-    const newHeapSize = gameState.heapSize - tokensToRemove;
-
-    return {
+function addTurn(player: Player, tokensRemoved: number): GameFn {
+    return gameState => ({
         ...gameState,
-        heapSize: newHeapSize,
         turns: [
             ...gameState.turns,
-            turn
-        ],
-        maxTokensAllowedToRemove: newHeapSize > gameState.config.maxTokensToRemove ? gameState.config.maxTokensToRemove : newHeapSize,
-        winner: (newHeapSize === 0) ? player : null
+            toTurn(player, tokensRemoved)
+        ]
+    });
+}
+
+function toTurn(player: Player, tokensRemoved: number): Turn {
+    return {
+        player,
+        tokensRemoved
     };
+}
+
+function updateHeapSize(tokensToRemove: number): GameFn {
+    return gameState => ({
+            ...gameState,
+            heapSize: gameState.heapSize - tokensToRemove
+    });
+}
+
+function updateMaxTokensAllowedToRemove(): GameFn {
+    return gameState => ({
+        ...gameState,
+        maxTokensAllowedToRemove: Math.min(gameState.config.maxTokensToRemove, gameState.heapSize)
+    });
+}
+
+function updateWinner(winner: Player): GameFn {
+    return gameState => ({
+        ...gameState,
+        winner
+    });
+}
+
+function isInvalidTurn(tokensToRemove: number): GamePredicate {
+    return ({ minTokensAllowedToRemove, maxTokensAllowedToRemove }) => !inRange(tokensToRemove, minTokensAllowedToRemove, maxTokensAllowedToRemove + 1);
+}
+
+function isStartingPlayer(player: Player): GamePredicate {
+    return ({ config }) => (config.startingPlayer === player);
+}
+
+function isFinished(): GamePredicate {
+    return ({ heapSize }) => (heapSize === 0);
+}
+
+function abortIf(predicate: GamePredicate, errorMessageFn: (gameState: GameState) => string): GameFn {
+    return gameState => {
+        if (predicate(gameState)) {
+            throw new Error(errorMessageFn(gameState));
+        }
+
+        return gameState;
+    };
+}
+
+function when(predicate: GamePredicate, whenTrueFn: GameFn): GameFn {
+    return gameState => predicate(gameState) ? whenTrueFn(gameState) : gameState;
 }

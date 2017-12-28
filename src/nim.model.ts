@@ -3,6 +3,13 @@ export enum Player {
     Machine = 'Machine'
 }
 
+export interface Game {
+    state: GameState;
+    playNextRound: PlayNextRound | null;
+}
+
+export type PlayNextRound = (tokensToRemove: number) => Game;
+
 export interface GameConfig {
     heapSize: number;
     minTokensToRemove: number;
