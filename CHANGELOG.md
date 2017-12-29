@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="4.0.0"></a>
+# [4.0.0](https://github.com/luchsamapparat/nim/compare/v3.0.0...v4.0.0) (2017-12-29)
+
+
+### Features
+
+* added example.js ([f6b76ad](https://github.com/luchsamapparat/nim/commit/f6b76ad))
+* refactored into separate ES modules, added tests for each function, changed all tests parametrized to match game config ([a78dffc](https://github.com/luchsamapparat/nim/commit/a78dffc))
+* updated tslint config ([34f7ce3](https://github.com/luchsamapparat/nim/commit/34f7ce3))
+
+
+### BREAKING CHANGES
+
+* added public playRound method instead of playNextRound method as part of startGame's return value
+
+
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/luchsamapparat/nim/compare/v2.0.0...v3.0.0) (2017-12-28)
 
