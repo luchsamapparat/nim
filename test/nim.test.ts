@@ -1,95 +1,92 @@
-import { findLast, first, last, range } from 'lodash';
-import { Game, GameConfig, GameState, Player, Strategy, getStrategies, startGame } from '../index';
-import { getMockStrategy, playGame } from './test-util';
+import { findLast, first, flow, last, range } from 'lodash';
+import { GameConfig, GameState, Player, Strategy, getStrategies, playRound, startGame } from '../index';
+import { getMockConfig, getMockStrategy, playGame } from './util';
 
-const gameConfig: GameConfig = {
-    heapSize: 13,
-    minTokensToRemove: 1,
-    maxTokensToRemove: 3,
-    startingPlayer: Player.Human,
-    strategy: getMockStrategy()
-};
+const gameConfig = getMockConfig();
 
 // tslint:disable-next-line:variable-name
 getStrategies().forEach(strategyFactory => {
     const strategy = strategyFactory();
 
-    describe(`NimGame with ${strategyFactory.name}`, () => {
+    describe(`NimGame with ${strategy.name}`, () => {
         test('the initial heap size is configurable', () => {
-            const game = startGame({
+            const gameState = startGame({
                 ...gameConfig,
                 strategy
             });
 
-            expect(game.state.heapSize).toBe(13);
+            expect(gameState.heapSize).toBe(gameConfig.heapSize);
         });
 
-        test('a player must remove at least one token', () => {
-            const game = startGame({
+        test('a player must remove at least the configured minimum number of tokens to remove', () => {
+            const tooLowNumberOfTokensToRemove = gameConfig.minTokensToRemove - 1;
+            const gameState = startGame({
                 ...gameConfig,
                 strategy
             });
 
-            expect(() => game.playNextRound(0)).toThrowError();
+            expect(() => playRound(tooLowNumberOfTokensToRemove)(gameState)).toThrowError();
         });
 
-        test('a player must remove at the maximum three tokens', () => {
-            const game = startGame({
+        test('a player must not remove more than configured maximum number of tokens to remove', () => {
+            const tooHighNumberOfTokensToRemove = gameConfig.maxTokensToRemove + 1;
+            const gameState = startGame({
                 ...gameConfig,
                 strategy
             });
 
-            expect(() => game.playNextRound(4)).toThrowError();
+            expect(() => playRound(tooHighNumberOfTokensToRemove)(gameState)).toThrowError();
         });
 
-        test('a player can remove between one and three tokens', () => {
-            range(1, 3)
+        test('a player can remove between the minimum and maximum number of tokens to remove', () => {
+            range(
+                gameConfig.minTokensToRemove,
+                gameConfig.maxTokensToRemove
+            )
                 .forEach(tokensToRemove => {
-                    const game = startGame({
+                    const gameState = flow(
+                        startGame,
+                        playRound(tokensToRemove)
+                    )({
                         ...gameConfig,
                         strategy
                     });
-
-                    let gameState: GameState;
-
-                    expect(() => {
-                        gameState = game.playNextRound(tokensToRemove).state;
-                    }).not.toThrowError();
 
                     const humanTurn = first(gameState.turns);
                     expect(humanTurn.tokensRemoved).toBe(tokensToRemove);
 
                     const machineTurn = last(gameState.turns);
-                    expect(machineTurn.tokensRemoved).toBeGreaterThanOrEqual(1);
-                    expect(machineTurn.tokensRemoved).toBeLessThanOrEqual(3);
+                    expect(machineTurn.tokensRemoved).toBeGreaterThanOrEqual(gameConfig.minTokensToRemove);
+                    expect(machineTurn.tokensRemoved).toBeLessThanOrEqual(gameConfig.maxTokensToRemove);
                 });
         });
 
         test('the machine plays the first turn automatically when the game starts and it is the starting player', () => {
-            const game = startGame({
+            const gameState = startGame({
                 ...gameConfig,
                 startingPlayer: Player.Machine,
                 strategy
             });
 
-            expect(game.state.heapSize).toBeLessThan(13);
-            expect(game.state.heapSize).toBeGreaterThanOrEqual(13 - 3);
-            expect(game.state.turns).toHaveLength(1);
+            expect(gameState.heapSize).toBeLessThan(gameConfig.heapSize);
+            expect(gameState.heapSize).toBeGreaterThanOrEqual(gameConfig.heapSize - gameConfig.maxTokensToRemove);
+            expect(gameState.turns).toHaveLength(1);
 
-            const machineTurn = first(game.state.turns);
+            const machineTurn = first(gameState.turns);
             expect(machineTurn.player).toBe(Player.Machine);
-            expect(machineTurn.tokensRemoved).toBeGreaterThanOrEqual(1);
-            expect(machineTurn.tokensRemoved).toBeLessThanOrEqual(3);
+            expect(machineTurn.tokensRemoved).toBeGreaterThanOrEqual(gameConfig.minTokensToRemove);
+            expect(machineTurn.tokensRemoved).toBeLessThanOrEqual(gameConfig.maxTokensToRemove);
         });
 
         test('the machine plays its turn automatically after its opponents turn', () => {
-            const tokensToRemove = 1;
-            const game = startGame({
+            const tokensToRemove = gameConfig.minTokensToRemove;
+            const gameState = flow(
+                startGame,
+                playRound(tokensToRemove)
+            )({
                 ...gameConfig,
                 strategy
             });
-
-            const gameState = game.playNextRound(tokensToRemove).state;
 
             const humanTurn = findLast(gameState.turns, turn => turn.player === Player.Human);
             expect(humanTurn.player).toBe(Player.Human);
@@ -97,31 +94,34 @@ getStrategies().forEach(strategyFactory => {
             const machineTurn = last(gameState.turns);
             expect(machineTurn.player).toBe(Player.Machine);
 
-            expect(gameState.heapSize).toBeLessThan(13 - tokensToRemove);
+            expect(gameState.heapSize).toBeLessThan(gameConfig.heapSize - tokensToRemove);
         });
 
         describe('game ending', () => {
-            let finishedGame: Game;
+            let finishedGameState: GameState;
 
             beforeEach(() => {
-                const game = startGame({
+                finishedGameState = flow(
+                    startGame,
+                    playGame()
+                )({
                     ...gameConfig,
                     strategy
                 });
-                finishedGame = playGame(game);
             });
 
             test('the game ends when the heap size is 0', () => {
-                expect(finishedGame.state.heapSize).toBe(0);
+                expect(finishedGameState.heapSize).toBe(0);
             });
 
             test('the last round declares a winner', () => {
-                expect(finishedGame.state.winner).not.toBeNull();
-                expect([Player.Machine, Player.Human]).toContain(finishedGame.state.winner);
+                expect(finishedGameState.winner).not.toBeNull();
+                expect([Player.Machine, Player.Human]).toContain(finishedGameState.winner);
             });
 
             test('it is not possible to play another round after the game has finished', () => {
-                expect(finishedGame.playNextRound).toBeNull();
+                const tokensToRemove = gameConfig.minTokensToRemove;
+                expect(() => playRound(tokensToRemove)(finishedGameState)).toThrowError();
             });
         });
 
@@ -157,16 +157,18 @@ describe('machine strategy', () => {
     });
 
     test('the machine receives the current game state to make its decision', () => {
-        const tokensToRemove = 1;
+        const tokensToRemove = gameConfig.minTokensToRemove;
         const config = {
             ...gameConfig,
             startingPlayer: Player.Human,
             strategy: mockStrategy
         };
-        const game = startGame(config);
+        const gameState = flow(
+            startGame,
+            playRound(tokensToRemove)
+        )(config);
 
-        game.playNextRound(tokensToRemove);
-        const heapSizeAfterHumanTurn = 13 - tokensToRemove;
+        const heapSizeAfterHumanTurn = config.heapSize - tokensToRemove;
 
         const passedGameState: GameState = getNextTurn.mock.calls[0][0];
 

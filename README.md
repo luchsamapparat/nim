@@ -21,9 +21,9 @@ Install dependcies first via `npm install`. Then...
 ### Basic Usage
 
 ```ts
-import { startGame, Player, remainderStrategy } from '@luchsamapparat/nim';
+import { GameState, Player, playRound, remainderStrategy, startGame } from '@luchsamapparat/nim';
 
-let game: Game = startGame({
+const gameState: GameState = startGame({
     heapSize: 13,
     minTokensToRemove: 1,
     maxTokensToRemove: 3,
@@ -51,7 +51,7 @@ let game: Game = startGame({
 //     }
 // }
 
-game = game.playNextRound(2);
+const updatedGameState: GameState = playRound(2)(gameState);
 
 // game = {
 //     playNextRound: (tokensToRemove: number) => Game
