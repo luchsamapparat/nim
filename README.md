@@ -16,6 +16,12 @@ Install dependcies first via `npm install`. Then...
 * `npm run watch` Clean the `dist` directory, build and test the library in parallel and repeat on file change
 * `npm test` Run tests
 
+## Release
+
+For this to work, git must be installed on the machine.
+
+* `npm run release` builds the library, commits the changes to `dist`, creates a new version and pushes it to the repository
+
 ## Use
 
 ### Basic Usage
