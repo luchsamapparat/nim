@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.0.0"></a>
+# [5.0.0](https://github.com/luchsamapparat/nim/compare/v4.1.1...v5.0.0) (2017-12-30)
+
+
+### Features
+
+* simplified Strategy API, GameConfig now serializable ([c5cad60](https://github.com/luchsamapparat/nim/commit/c5cad60))
+
+
+### BREAKING CHANGES
+
+* GameConfig.strategy is now the strategy name
+
+
+
 <a name="4.1.1"></a>
 ## [4.1.1](https://github.com/luchsamapparat/nim/compare/v4.1.0...v4.1.1) (2017-12-30)
 
