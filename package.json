@@ -12,7 +12,8 @@
     "watch": "run-s clean dev",
     "dev": "run-p \"compile -- --watch\" \"test -- --notify --watch\"",
     "test": "jest --verbose",
-    "release": "standard-version"
+    "new-version": "standard-version",
+    "release": "run-s build new-version"
   },
   "repository": {
     "type": "git",
