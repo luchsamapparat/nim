@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="4.1.0"></a>
+# [4.1.0](https://github.com/luchsamapparat/nim/compare/v4.0.0...v4.1.0) (2017-12-30)
+
+
+### Features
+
+* added test utils to public API ([84c43d4](https://github.com/luchsamapparat/nim/commit/84c43d4))
+
+
+
 <a name="4.0.0"></a>
 # [4.0.0](https://github.com/luchsamapparat/nim/compare/v3.0.0...v4.0.0) (2017-12-29)
 
