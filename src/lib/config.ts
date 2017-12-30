@@ -1,13 +1,13 @@
 import { GameFn } from './game';
 import { Player } from './state';
-import { Strategy } from './strategy';
+import { StrategyName } from './strategy';
 
 export interface GameConfig {
     heapSize: number;
     minTokensToRemove: number;
     maxTokensToRemove: number;
     startingPlayer: Player;
-    strategy: Strategy;
+    strategy: StrategyName;
 }
 
 export function getStateFromConfig(): GameFn<GameConfig> {

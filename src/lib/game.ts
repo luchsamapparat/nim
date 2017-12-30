@@ -1,6 +1,7 @@
 import { flow } from 'lodash';
 import { isFinished, isInvalidTurn } from './predicates';
 import { GameState, Player, updateStateWithTurn } from './state';
+import { getStrategy } from './strategy';
 import { abortIf } from './util';
 
 export type GameFn<T = GameState> = (arg: T) => GameState;
@@ -19,7 +20,7 @@ export function playMachineTurn(): GameFn {
 }
 
 function getNextTurn(gameState: GameState): number {
-    return gameState.config.strategy.getNextTurn(gameState);
+    return getStrategy(gameState.config.strategy)(gameState);
 }
 
 function playTurn(player: Player, tokensToRemove: number): GameFn {

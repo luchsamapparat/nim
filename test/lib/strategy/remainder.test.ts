@@ -3,16 +3,10 @@ import { Strategy, remainderStrategy } from '../../../index';
 import { getMockState } from '../../util';
 
 describe('RemainderStrategy', () => {
-    let strategy: Strategy;
-
     const gameState = getMockState();
     const gameConfig = gameState.config;
 
     const groupSize = gameConfig.minTokensToRemove + gameConfig.maxTokensToRemove;
-
-    beforeEach(() => {
-        strategy = remainderStrategy();
-    });
 
     describe('try to get the heap size to (n * (MIN + MAX)) + MIN;', () => {
 
@@ -36,7 +30,7 @@ describe('RemainderStrategy', () => {
                                 ...gameState,
                                 heapSize
                             };
-                            expect(strategy.getNextTurn(state)).toBe(numberOfTokensToRemove);
+                            expect(remainderStrategy(state)).toBe(numberOfTokensToRemove);
                         });
                 });
             });

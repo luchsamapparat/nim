@@ -2,15 +2,9 @@ import { range } from 'lodash';
 import { Player, Strategy, Turn, mimicHumanStrategy } from '../../../index';
 import { getMockState } from '../../util';
 
-describe('MimicHumanStrategy', () => {
-    let strategy: Strategy;
-
+describe('mimicHumanStrategy', () => {
     const gameState = getMockState();
     const gameConfig = gameState.config;
-
-    beforeEach(() => {
-        strategy = mimicHumanStrategy();
-    });
 
     test('it removes the same amount of tokens as the player did before', () => {
         range(gameConfig.minTokensToRemove, gameConfig.maxTokensToRemove)
@@ -23,7 +17,7 @@ describe('MimicHumanStrategy', () => {
                     }]
                 };
 
-                expect(strategy.getNextTurn(state)).toBe(tokensRemoved);
+                expect(mimicHumanStrategy(state)).toBe(tokensRemoved);
             });
     });
 
@@ -40,6 +34,6 @@ describe('MimicHumanStrategy', () => {
             }]
         };
 
-        expect(strategy.getNextTurn(state)).toBe(heapSize);
+        expect(mimicHumanStrategy(state)).toBe(heapSize);
     });
 });

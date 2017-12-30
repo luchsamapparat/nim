@@ -1,2 +1,2 @@
-import { StrategyFactory } from '../strategy';
-export declare const randomStrategy: StrategyFactory;
+import { Strategy } from '../strategy';
+export declare const randomStrategy: Strategy;

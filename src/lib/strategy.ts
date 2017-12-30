@@ -1,3 +1,5 @@
+import { find } from 'lodash';
+import { isUndefined } from 'util';
 import { GameState } from './state';
 import { alwaysMinStrategy } from './strategy/always-min';
 import { mimicHumanStrategy } from './strategy/mimic-human';
@@ -9,21 +11,28 @@ export * from './strategy/mimic-human';
 export * from './strategy/random';
 export * from './strategy/remainder';
 
-export type StrategyFn = (gameState: GameState) => number;
+export type Strategy = (gameState: GameState) => number;
 
-export interface Strategy {
-    name: string;
-    getNextTurn: StrategyFn;
+export enum StrategyName {
+    AlwaysMinStrategy = 'alwaysMinStrategy',
+    MimicHumanStrategy = 'mimicHumanStrategy',
+    RandomStrategy = 'randomStrategy',
+    RemainderStrategy = 'remainderStrategy'
 }
 
-export type StrategyFactory = (...args: any[]) => Strategy;
+export const strategies = {
+    [StrategyName.AlwaysMinStrategy]: alwaysMinStrategy,
+    [StrategyName.MimicHumanStrategy]: mimicHumanStrategy,
+    [StrategyName.RandomStrategy]: randomStrategy,
+    [StrategyName.RemainderStrategy]: remainderStrategy
+};
 
+export function getStrategy(strategyName: StrategyName): Strategy {
+    const strategy = find(strategies, (fn, name) => name === strategyName)!;
 
-export function getStrategies(): StrategyFactory[] {
-    return [
-        alwaysMinStrategy,
-        mimicHumanStrategy,
-        randomStrategy,
-        remainderStrategy
-    ];
+    if (isUndefined(strategy)) {
+        throw new Error(`${strategyName} is not a valid Strategy.`);
+    }
+
+    return strategy;
 }

@@ -1,14 +1,13 @@
-import { findLast, first, flow, last, range } from 'lodash';
-import { GameConfig, GameState, Player, Strategy, getStrategies, playRound, startGame } from '../index';
-import { getMockConfig, getMockStrategy, playGame } from './util';
+import { findLast, first, flow, forEach, last, range } from 'lodash';
+import { GameConfig, GameState, Player, Strategy, StrategyName, playRound, startGame, strategies } from '../index';
+import { getMockConfig, getMockStrategy, mockStrategyName, playGame } from './util';
 
 const gameConfig = getMockConfig();
 
 // tslint:disable-next-line:variable-name
-getStrategies().forEach(strategyFactory => {
-    const strategy = strategyFactory();
+Object.keys(strategies).forEach((strategy: StrategyName) => {
 
-    describe(`NimGame with ${strategy.name}`, () => {
+    describe(`NimGame with ${strategy}`, () => {
         test('the initial heap size is configurable', () => {
             const gameState = startGame({
                 ...gameConfig,
@@ -130,23 +129,29 @@ getStrategies().forEach(strategyFactory => {
 });
 
 describe('machine strategy', () => {
-    let mockStrategy;
-    let getNextTurn: jest.SpyInstance;
+    const mockStrategy: jest.SpyInstance = (<any> getMockStrategy());
+
+    beforeAll(() => {
+        strategies[mockStrategyName] = mockStrategy;
+    });
+
+    afterAll(() => {
+        delete strategies[mockStrategyName];
+    });
 
     beforeEach(() => {
-        mockStrategy = getMockStrategy();
-        getNextTurn = (<any> mockStrategy.getNextTurn);
+        mockStrategy.mockClear();
     });
 
     test('when the machine is the starting player, it receives the current game state to make its decision', () => {
         const config = {
             ...gameConfig,
             startingPlayer: Player.Machine,
-            strategy: mockStrategy
+            strategy: (<any> mockStrategyName)
         };
         startGame(config);
 
-        const passedGameState: GameState = getNextTurn.mock.calls[0][0];
+        const passedGameState: GameState = mockStrategy.mock.calls[0][0];
 
         expect(passedGameState.config).toEqual(config);
         expect(passedGameState.heapSize).toBe(config.heapSize);
@@ -161,7 +166,7 @@ describe('machine strategy', () => {
         const config = {
             ...gameConfig,
             startingPlayer: Player.Human,
-            strategy: mockStrategy
+            strategy: (<any> mockStrategyName)
         };
         const gameState = flow(
             startGame,
@@ -170,7 +175,7 @@ describe('machine strategy', () => {
 
         const heapSizeAfterHumanTurn = config.heapSize - tokensToRemove;
 
-        const passedGameState: GameState = getNextTurn.mock.calls[0][0];
+        const passedGameState: GameState = mockStrategy.mock.calls[0][0];
 
         expect(passedGameState.config).toEqual(config);
         expect(passedGameState.heapSize).toBe(heapSizeAfterHumanTurn);

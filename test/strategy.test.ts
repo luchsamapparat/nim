@@ -1,12 +1,16 @@
-import { alwaysMinStrategy, getStrategies, mimicHumanStrategy, randomStrategy, remainderStrategy } from '../index';
+import { forEach } from 'lodash';
+import { Strategy, StrategyName, getStrategy, strategies } from '../index';
 
-describe('getStrategies', () => {
-    test('it returns all strategies', () => {
-        expect(getStrategies()).toEqual([
-            alwaysMinStrategy,
-            mimicHumanStrategy,
-            randomStrategy,
-            remainderStrategy
-        ]);
+describe('getStrategy', () => {
+
+    test('it returns the strategy matching the given name', () => {
+        forEach(strategies, (strategy: Strategy, name: StrategyName) => {
+            expect(getStrategy(name)).toBe(strategy);
+        });
     });
+
+    test('it returns undefined when to strategy matches the given name', () => {
+        expect(() => getStrategy(<any> 'invalidName')).toThrowError();
+    });
+
 });

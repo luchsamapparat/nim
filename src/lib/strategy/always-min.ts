@@ -1,8 +1,5 @@
-import { StrategyFactory } from '../strategy';
+import { Strategy } from '../strategy';
 
-export const alwaysMinStrategy: StrategyFactory = () => ({
-    name: 'alwaysMinStrategy',
-    getNextTurn({ minTokensAllowedToRemove }): number {
-        return minTokensAllowedToRemove;
-    }
-});
+export const alwaysMinStrategy: Strategy = ({ minTokensAllowedToRemove }): number => {
+    return minTokensAllowedToRemove;
+};

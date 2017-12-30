@@ -1,7 +1,7 @@
 import { first, range } from 'lodash';
-import { GameState, Player, Strategy } from '../../index';
+import { GameState, Player, Strategy, strategies } from '../../index';
 import { playHumanTurn, playMachineTurn } from '../../src/lib/game';
-import { getMockState, getMockStrategy } from '../util';
+import { getMockState, getMockStrategy, mockStrategyName } from '../util';
 
 const initialState = getMockState();
 
@@ -35,18 +35,24 @@ describe('playHumanTurn', () => {
 });
 
 describe('playMachineTurn', () => {
-    let mockStrategy: Strategy;
-    let getNextTurn: jest.SpyInstance;
+    const mockStrategy: jest.SpyInstance = (<any> getMockStrategy());
     let stateWithMockStrategy: GameState;
 
+    beforeAll(() => {
+        strategies[mockStrategyName] = mockStrategy;
+    });
+
+    afterAll(() => {
+        delete strategies[mockStrategyName];
+    });
+
     beforeEach(() => {
-        mockStrategy = getMockStrategy();
-        getNextTurn = (<any> mockStrategy.getNextTurn);
+        mockStrategy.mockClear();
         stateWithMockStrategy = {
             ...initialState,
             config: {
                 ...initialState.config,
-                strategy: mockStrategy
+                strategy: (<any> mockStrategyName)
             }
         };
     });
@@ -76,6 +82,6 @@ describe('playMachineTurn', () => {
     test('it uses the configured strategy to determine the number of tokens to remove', () => {
         const state = playMachineTurn()(stateWithMockStrategy);
 
-        expect(getNextTurn).toHaveBeenLastCalledWith(stateWithMockStrategy);
+        expect(mockStrategy).toHaveBeenLastCalledWith(stateWithMockStrategy);
     });
 });

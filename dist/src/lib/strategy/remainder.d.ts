@@ -1,2 +1,2 @@
-import { StrategyFactory } from '../strategy';
-export declare const remainderStrategy: StrategyFactory;
+import { Strategy } from '../strategy';
+export declare const remainderStrategy: Strategy;
