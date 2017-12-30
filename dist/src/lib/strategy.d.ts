@@ -11,9 +11,9 @@ export declare enum StrategyName {
     RemainderStrategy = "remainderStrategy",
 }
 export declare const strategies: {
-    [StrategyName.AlwaysMinStrategy]: Strategy;
-    [StrategyName.MimicHumanStrategy]: Strategy;
-    [StrategyName.RandomStrategy]: Strategy;
-    [StrategyName.RemainderStrategy]: Strategy;
+    alwaysMinStrategy: Strategy;
+    mimicHumanStrategy: Strategy;
+    randomStrategy: Strategy;
+    remainderStrategy: Strategy;
 };
 export declare function getStrategy(strategyName: StrategyName): Strategy;

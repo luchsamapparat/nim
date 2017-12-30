@@ -21,10 +21,10 @@ var StrategyName;
     StrategyName["RemainderStrategy"] = "remainderStrategy";
 })(StrategyName = exports.StrategyName || (exports.StrategyName = {}));
 exports.strategies = {
-    [StrategyName.AlwaysMinStrategy]: always_min_1.alwaysMinStrategy,
-    [StrategyName.MimicHumanStrategy]: mimic_human_1.mimicHumanStrategy,
-    [StrategyName.RandomStrategy]: random_1.randomStrategy,
-    [StrategyName.RemainderStrategy]: remainder_1.remainderStrategy
+    alwaysMinStrategy: always_min_1.alwaysMinStrategy,
+    mimicHumanStrategy: mimic_human_1.mimicHumanStrategy,
+    randomStrategy: random_1.randomStrategy,
+    remainderStrategy: remainder_1.remainderStrategy
 };
 function getStrategy(strategyName) {
     const strategy = lodash_1.find(exports.strategies, (fn, name) => name === strategyName);
