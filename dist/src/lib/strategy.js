@@ -29,7 +29,7 @@ exports.strategies = {
 function getStrategy(strategyName) {
     const strategy = lodash_1.find(exports.strategies, (fn, name) => name === strategyName);
     if (util_1.isUndefined(strategy)) {
-        throw new Error(`${strategyName} is not a valid Strategy.`);
+        throw new Error(`${strategyName} is not a valid strategy.`);
     }
     return strategy;
 }
