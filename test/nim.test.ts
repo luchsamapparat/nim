@@ -1,7 +1,8 @@
 import { findLast, first, flow, forEach, last, range } from 'lodash';
 import { GameConfig, GameState, Player, Strategy, StrategyName, playRound, startGame, strategies } from '../index';
-import { getMockConfig, getMockStrategy, mockStrategyName, playGame } from './util';
+import { getMockConfig, getMockStrategy, getPartialMockConfig, mockStrategyName, playGame } from './util';
 
+const partialGameConfig = getPartialMockConfig();
 const gameConfig = getMockConfig();
 
 // tslint:disable-next-line:variable-name
@@ -10,7 +11,7 @@ Object.keys(strategies).forEach((strategy: StrategyName) => {
     describe(`NimGame with ${strategy}`, () => {
         test('the initial heap size is configurable', () => {
             const gameState = startGame({
-                ...gameConfig,
+                ...partialGameConfig,
                 strategy
             });
 
@@ -20,7 +21,7 @@ Object.keys(strategies).forEach((strategy: StrategyName) => {
         test('a player must remove at least the configured minimum number of tokens to remove', () => {
             const tooLowNumberOfTokensToRemove = gameConfig.minTokensToRemove - 1;
             const gameState = startGame({
-                ...gameConfig,
+                ...partialGameConfig,
                 strategy
             });
 
@@ -30,7 +31,7 @@ Object.keys(strategies).forEach((strategy: StrategyName) => {
         test('a player must not remove more than configured maximum number of tokens to remove', () => {
             const tooHighNumberOfTokensToRemove = gameConfig.maxTokensToRemove + 1;
             const gameState = startGame({
-                ...gameConfig,
+                ...partialGameConfig,
                 strategy
             });
 
@@ -47,7 +48,7 @@ Object.keys(strategies).forEach((strategy: StrategyName) => {
                         startGame,
                         playRound(tokensToRemove)
                     )({
-                        ...gameConfig,
+                        ...partialGameConfig,
                         strategy
                     });
 
@@ -62,7 +63,7 @@ Object.keys(strategies).forEach((strategy: StrategyName) => {
 
         test('the machine plays the first turn automatically when the game starts and it is the starting player', () => {
             const gameState = startGame({
-                ...gameConfig,
+                ...partialGameConfig,
                 startingPlayer: Player.Machine,
                 strategy
             });
@@ -83,7 +84,7 @@ Object.keys(strategies).forEach((strategy: StrategyName) => {
                 startGame,
                 playRound(tokensToRemove)
             )({
-                ...gameConfig,
+                ...partialGameConfig,
                 strategy
             });
 
@@ -144,17 +145,21 @@ describe('machine strategy', () => {
     });
 
     test('when the machine is the starting player, it receives the current game state to make its decision', () => {
-        const config = {
-            ...gameConfig,
+        const config: Partial<GameConfig> = {
+            ...partialGameConfig,
             startingPlayer: Player.Machine,
             strategy: (<any> mockStrategyName)
+        };
+        const expectedConfig: GameConfig = {
+            ...gameConfig,
+            ...config
         };
         startGame(config);
 
         const passedGameState: GameState = mockStrategy.mock.calls[0][0];
 
-        expect(passedGameState.config).toEqual(config);
-        expect(passedGameState.heapSize).toBe(config.heapSize);
+        expect(passedGameState.config).toEqual(expectedConfig);
+        expect(passedGameState.heapSize).toBe(gameConfig.heapSize);
         expect(passedGameState.minTokensAllowedToRemove).toBe(gameConfig.minTokensToRemove);
         expect(passedGameState.maxTokensAllowedToRemove).toBe(gameConfig.maxTokensToRemove);
         expect(passedGameState.turns).toHaveLength(0);
@@ -163,21 +168,25 @@ describe('machine strategy', () => {
 
     test('the machine receives the current game state to make its decision', () => {
         const tokensToRemove = gameConfig.minTokensToRemove;
-        const config = {
-            ...gameConfig,
+        const config: Partial<GameConfig> = {
+            ...partialGameConfig,
             startingPlayer: Player.Human,
             strategy: (<any> mockStrategyName)
+        };
+        const expectedConfig: GameConfig = {
+            ...gameConfig,
+            ...config
         };
         const gameState = flow(
             startGame,
             playRound(tokensToRemove)
         )(config);
 
-        const heapSizeAfterHumanTurn = config.heapSize - tokensToRemove;
+        const heapSizeAfterHumanTurn = gameConfig.heapSize - tokensToRemove;
 
         const passedGameState: GameState = mockStrategy.mock.calls[0][0];
 
-        expect(passedGameState.config).toEqual(config);
+        expect(passedGameState.config).toEqual(expectedConfig);
         expect(passedGameState.heapSize).toBe(heapSizeAfterHumanTurn);
         expect(passedGameState.minTokensAllowedToRemove).toBe(gameConfig.minTokensToRemove);
         expect(passedGameState.maxTokensAllowedToRemove).toBe(gameConfig.maxTokensToRemove);
