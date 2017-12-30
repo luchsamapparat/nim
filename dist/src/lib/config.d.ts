@@ -8,4 +8,6 @@ export interface GameConfig {
     startingPlayer: Player;
     strategy: StrategyName;
 }
+export declare const defaultGameConfig: GameConfig;
 export declare function getStateFromConfig(): GameFn<GameConfig>;
+export declare function applyDefaultConfig(): (config: Partial<GameConfig>) => GameConfig;
