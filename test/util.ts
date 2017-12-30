@@ -1,5 +1,5 @@
-import { flow, isNull, negate, random } from 'lodash';
-import { GameConfig, GameState, Player, Strategy, StrategyFactory, isFinished, playRound } from '../index';
+import { flow, negate, random } from 'lodash';
+import { GameConfig, GameState, Player, StrategyFactory, isFinished, playRound } from '../index';
 import { GameFn } from '../src/lib/game';
 import { when } from '../src/lib/util';
 
