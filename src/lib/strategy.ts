@@ -31,7 +31,7 @@ export function getStrategy(strategyName: StrategyName): Strategy {
     const strategy = find(strategies, (fn, name) => name === strategyName)!;
 
     if (isUndefined(strategy)) {
-        throw new Error(`${strategyName} is not a valid Strategy.`);
+        throw new Error(`${strategyName} is not a valid strategy.`);
     }
 
     return strategy;
