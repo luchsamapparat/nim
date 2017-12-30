@@ -1,6 +1,6 @@
 {
   "name": "@luchsamapparat/nim",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "Nim game library",
   "main": "dist/index",
   "typings": "dist/index",
@@ -12,7 +12,7 @@
     "watch": "run-s clean dev",
     "dev": "run-p \"compile -- --watch\" \"test -- --notify --watch\"",
     "test": "jest --verbose",
-    "new-version": "standard-version --commit-all",
+    "new-version": "standard-version --commitAll",
     "release": "run-s build new-version"
   },
   "repository": {
