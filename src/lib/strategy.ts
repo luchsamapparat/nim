@@ -21,10 +21,10 @@ export enum StrategyName {
 }
 
 export const strategies = {
-    [StrategyName.AlwaysMinStrategy]: alwaysMinStrategy,
-    [StrategyName.MimicHumanStrategy]: mimicHumanStrategy,
-    [StrategyName.RandomStrategy]: randomStrategy,
-    [StrategyName.RemainderStrategy]: remainderStrategy
+    alwaysMinStrategy,
+    mimicHumanStrategy,
+    randomStrategy,
+    remainderStrategy
 };
 
 export function getStrategy(strategyName: StrategyName): Strategy {
