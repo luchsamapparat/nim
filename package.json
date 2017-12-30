@@ -1,6 +1,6 @@
 {
   "name": "@luchsamapparat/nim",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Nim game library",
   "main": "dist/index",
   "typings": "dist/index",

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.0.1"></a>
+## [5.0.1](https://github.com/luchsamapparat/nim/compare/v5.0.0...v5.0.1) (2017-12-30)
+
+
+### Bug Fixes
+
+* "A computed property name in a type literal must directly refer to a built-in symbol." ([dcd8e41](https://github.com/luchsamapparat/nim/commit/dcd8e41))
+
+
+
 <a name="5.0.0"></a>
 # [5.0.0](https://github.com/luchsamapparat/nim/compare/v4.1.1...v5.0.0) (2017-12-30)
 
