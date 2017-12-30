@@ -13,6 +13,7 @@
     "dev": "run-p \"compile -- --watch\" \"test -- --notify --watch\"",
     "test": "jest --verbose",
     "git-add": "git add .",
+    "git-push": "git push --follow-tags origin master",
     "new-version": "standard-version --commit-all",
     "release": "run-s build git-add new-version"
   },
