@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.2.0"></a>
+# [5.2.0](https://github.com/luchsamapparat/nim/compare/v5.1.0...v5.2.0) (2018-01-01)
+
+
+### Features
+
+* changed target from es2015 to es5 ([3f4f77e](https://github.com/luchsamapparat/nim/commit/3f4f77e))
+
+
+
 <a name="5.1.0"></a>
 # [5.1.0](https://github.com/luchsamapparat/nim/compare/v5.0.7...v5.1.0) (2017-12-30)
 

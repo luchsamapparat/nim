@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const lodash_1 = require("lodash");
-exports.mimicHumanStrategy = ({ turns, minTokensAllowedToRemove, maxTokensAllowedToRemove }) => {
+var lodash_1 = require("lodash");
+exports.mimicHumanStrategy = function (_a) {
+    var turns = _a.turns, minTokensAllowedToRemove = _a.minTokensAllowedToRemove, maxTokensAllowedToRemove = _a.maxTokensAllowedToRemove;
     if (lodash_1.isEmpty(turns)) {
         return minTokensAllowedToRemove;
     }

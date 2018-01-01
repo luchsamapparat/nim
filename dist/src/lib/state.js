@@ -1,8 +1,16 @@
 "use strict";
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const lodash_1 = require("lodash");
-const predicates_1 = require("./predicates");
-const util_1 = require("./util");
+var lodash_1 = require("lodash");
+var predicates_1 = require("./predicates");
+var util_1 = require("./util");
 var Player;
 (function (Player) {
     Player["Human"] = "Human";
@@ -13,26 +21,25 @@ function updateStateWithTurn(player, tokensToRemove) {
 }
 exports.updateStateWithTurn = updateStateWithTurn;
 function addTurn(player, tokensRemoved) {
-    return gameState => (Object.assign({}, gameState, { turns: [
-            ...gameState.turns,
+    return function (gameState) { return (__assign({}, gameState, { turns: gameState.turns.concat([
             toTurn(player, tokensRemoved)
-        ] }));
+        ]) })); };
 }
 function updateHeapSize(tokensToRemove) {
-    return gameState => (Object.assign({}, gameState, { heapSize: gameState.heapSize - tokensToRemove }));
+    return function (gameState) { return (__assign({}, gameState, { heapSize: gameState.heapSize - tokensToRemove })); };
 }
 function updateTokensAllowedToRemove() {
-    return gameState => (Object.assign({}, gameState, { minTokensAllowedToRemove: Math.min(gameState.config.minTokensToRemove, gameState.heapSize), maxTokensAllowedToRemove: Math.min(gameState.config.maxTokensToRemove, gameState.heapSize) }));
+    return function (gameState) { return (__assign({}, gameState, { minTokensAllowedToRemove: Math.min(gameState.config.minTokensToRemove, gameState.heapSize), maxTokensAllowedToRemove: Math.min(gameState.config.maxTokensToRemove, gameState.heapSize) })); };
 }
 function updateWinner(winner) {
-    return gameState => (Object.assign({}, gameState, { winner }));
+    return function (gameState) { return (__assign({}, gameState, { winner: winner })); };
 }
 function getOpponent(player) {
     return (player === Player.Machine) ? Player.Human : Player.Machine;
 }
 function toTurn(player, tokensRemoved) {
     return {
-        player,
-        tokensRemoved
+        player: player,
+        tokensRemoved: tokensRemoved
     };
 }

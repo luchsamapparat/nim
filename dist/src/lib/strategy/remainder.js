@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.remainderStrategy = ({ heapSize, minTokensAllowedToRemove, maxTokensAllowedToRemove }) => {
-    let tokensToRemove = 0;
+exports.remainderStrategy = function (_a) {
+    var heapSize = _a.heapSize, minTokensAllowedToRemove = _a.minTokensAllowedToRemove, maxTokensAllowedToRemove = _a.maxTokensAllowedToRemove;
+    var tokensToRemove = 0;
     // build groups of (min + maxTokensToRemove) and determine the number
     // of remaining tokens
-    const remainder = heapSize % (minTokensAllowedToRemove + maxTokensAllowedToRemove);
+    var remainder = heapSize % (minTokensAllowedToRemove + maxTokensAllowedToRemove);
     // to reduce the number of remaining tokens to one, remove all of the remaining
     // tokens but the minimum allowed number of tokens to remove
     if (remainder > 0) {
