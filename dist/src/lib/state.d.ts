@@ -2,7 +2,7 @@ import { GameConfig } from './config';
 import { GameFn } from './game';
 export declare enum Player {
     Human = "Human",
-    Machine = "Machine",
+    Machine = "Machine"
 }
 export interface GameState {
     heapSize: number;

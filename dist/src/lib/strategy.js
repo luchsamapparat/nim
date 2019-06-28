@@ -4,7 +4,6 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 var lodash_1 = require("lodash");
-var util_1 = require("util");
 var always_min_1 = require("./strategy/always-min");
 var mimic_human_1 = require("./strategy/mimic-human");
 var random_1 = require("./strategy/random");
@@ -28,7 +27,7 @@ exports.strategies = {
 };
 function getStrategy(strategyName) {
     var strategy = lodash_1.find(exports.strategies, function (fn, name) { return name === strategyName; });
-    if (util_1.isUndefined(strategy)) {
+    if (lodash_1.isUndefined(strategy)) {
         throw new Error(strategyName + " is not a valid strategy.");
     }
     return strategy;

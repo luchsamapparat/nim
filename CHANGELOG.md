@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.2.1"></a>
+## [5.2.1](https://github.com/luchsamapparat/nim/compare/v5.2.0...v5.2.1) (2019-06-28)
+
+
+### Bug Fixes
+
+* security issues ([ee30f74](https://github.com/luchsamapparat/nim/commit/ee30f74))
+
+
+
 <a name="5.2.0"></a>
 # [5.2.0](https://github.com/luchsamapparat/nim/compare/v5.1.0...v5.2.0) (2018-01-01)
 

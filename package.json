@@ -1,6 +1,6 @@
 {
   "name": "@luchsamapparat/nim",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "description": "Nim game library",
   "main": "dist/index",
   "typings": "dist/index",
@@ -44,7 +44,7 @@
     "ts-jest": "24.0.2",
     "tslint": "5.18.0",
     "tslint-config-luchsamapparat": "1.6.0",
-    "typescript": "2.9.2"
+    "typescript": "3.5.2"
   },
   "dependencies": {
     "lodash": "4.17.11"

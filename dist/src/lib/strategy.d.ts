@@ -8,7 +8,7 @@ export declare enum StrategyName {
     AlwaysMinStrategy = "alwaysMinStrategy",
     MimicHumanStrategy = "mimicHumanStrategy",
     RandomStrategy = "randomStrategy",
-    RemainderStrategy = "remainderStrategy",
+    RemainderStrategy = "remainderStrategy"
 }
 export declare const strategies: {
     alwaysMinStrategy: Strategy;
