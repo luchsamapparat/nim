@@ -1,5 +1,4 @@
-import { find } from 'lodash';
-import { isUndefined } from 'util';
+import { find, isUndefined } from 'lodash';
 import { GameState } from './state';
 import { alwaysMinStrategy } from './strategy/always-min';
 import { mimicHumanStrategy } from './strategy/mimic-human';

@@ -1,5 +1,5 @@
-import { findLast, first, flow, forEach, last, range } from 'lodash';
-import { GameConfig, GameState, Player, Strategy, StrategyName, playRound, startGame, strategies } from '../index';
+import { findLast, first, flow, last, range } from 'lodash';
+import { GameConfig, GameState, Player, playRound, startGame, strategies, StrategyName } from '../index';
 import { getMockConfig, getMockStrategy, getPartialMockConfig, mockStrategyName, playGame } from './util';
 
 const partialGameConfig = getPartialMockConfig();
